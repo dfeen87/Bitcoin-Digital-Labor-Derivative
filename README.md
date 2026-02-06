@@ -318,10 +318,6 @@ will require a **v2.0.0 major release**.
 4. **Transparent Ledger:** All distributions verifiable on-chain
 5. **Open Source:** Full auditability of distribution logic
 
-## Contributing
-
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
 ### Development
 
 ```bash
