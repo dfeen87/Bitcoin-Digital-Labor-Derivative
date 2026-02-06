@@ -1,5 +1,12 @@
 # Architecture Overview
 
+> **Scope Note**
+>
+> This document describes the full protocol architecture and long-term design of the Bitcoin Digital Labor Derivative (DLD) Protocol.
+> The v1.0.0 release implements the protocol’s non-custodial, read-only analytical core, including velocity scoring, trust coefficients, and RBI monitoring.
+> Transaction construction, fund custody, on-chain governance signaling, and execution components are intentionally out of scope for v1.0.0 and reserved for future releases.
+
+
 ## System Design Philosophy
 
 The Bitcoin DLD Protocol is designed with three core principles:
