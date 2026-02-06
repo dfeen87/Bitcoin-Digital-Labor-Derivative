@@ -66,7 +66,7 @@ pub enum FundingMechanism {
 ### Crate Structure
 
 ```
-bitcoin-dld-protocol/
+Bitcoin-Digital-Labor-Derivative/
 ├── crates/
 │   ├── derivative-engine/     # Core D̂ᵢ calculation engine
 │   ├── bitcoin-integration/   # Timelock scripts, UTXO analysis
