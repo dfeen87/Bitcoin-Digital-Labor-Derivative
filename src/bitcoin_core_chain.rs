@@ -7,7 +7,7 @@ use bitcoincore_rpc::{Client, RpcApi};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tracing::{debug, info};
 
 /// Bitcoin Core-backed chain data source.
@@ -16,6 +16,7 @@ pub struct BitcoinCoreChainDataSource {
     client: Client,
     rpc_config: RpcConfig,
     cache: Arc<Mutex<CacheState>>,
+    metrics: Arc<Metrics>,
 }
 
 impl BitcoinCoreChainDataSource {
@@ -28,6 +29,7 @@ impl BitcoinCoreChainDataSource {
             client,
             rpc_config,
             cache: Arc::new(Mutex::new(CacheState::default())),
+            metrics: Arc::new(Metrics::default()),
         }
     }
 
@@ -44,6 +46,28 @@ impl BitcoinCoreChainDataSource {
 
     fn map_rpc_error<E: std::fmt::Display>(error: E) -> VelocityError {
         VelocityError::DataSource(error.to_string())
+    }
+
+    fn classify_rpc_error(error: &bitcoincore_rpc::Error) -> RpcFailureClass {
+        let message = error.to_string().to_lowercase();
+        if message.contains("pruned") || message.contains("pruning") {
+            return RpcFailureClass::Permanent;
+        }
+        if message.contains("timeout")
+            || message.contains("timed out")
+            || message.contains("connection")
+            || message.contains("transport")
+            || message.contains("broken pipe")
+            || message.contains("temporarily unavailable")
+        {
+            return RpcFailureClass::Transient;
+        }
+        RpcFailureClass::Permanent
+    }
+
+    fn is_pruned_error(error: &bitcoincore_rpc::Error) -> bool {
+        let message = error.to_string().to_lowercase();
+        message.contains("pruned") || message.contains("pruning")
     }
 
     fn normalized_addresses(addresses: &[String]) -> Vec<String> {
@@ -66,6 +90,7 @@ impl BitcoinCoreChainDataSource {
             let timeout = self.rpc_config.timeout;
             let call = Arc::clone(&call);
             let (tx, rx) = std::sync::mpsc::channel();
+            let started = Instant::now();
             std::thread::spawn(move || {
                 let result = call();
                 let _ = tx.send(result);
@@ -74,6 +99,7 @@ impl BitcoinCoreChainDataSource {
             match rx.recv_timeout(timeout) {
                 Ok(result) => match result {
                     Ok(value) => {
+                        self.metrics.record_rpc_success(action, started.elapsed());
                         if attempt > 0 {
                             info!(
                                 action,
@@ -84,18 +110,30 @@ impl BitcoinCoreChainDataSource {
                         return Ok(value);
                     }
                     Err(err) => {
+                        if Self::is_pruned_error(&err) {
+                            self.metrics.record_pruned_node(action);
+                            return Err(VelocityError::InvalidData(format!(
+                                "bitcoin core node is pruned or missing data: {err}"
+                            )));
+                        }
+                        let failure_class = Self::classify_rpc_error(&err);
+                        self.metrics.record_rpc_failure(action, failure_class, started.elapsed());
                         debug!(
                             action,
                             attempt = attempt + 1,
                             error = %err,
                             "rpc call failed"
                         );
+                        if failure_class == RpcFailureClass::Permanent {
+                            return Err(Self::map_rpc_error(err));
+                        }
                         if attempt + 1 == attempts {
                             return Err(Self::map_rpc_error(err));
                         }
                     }
                 },
                 Err(_) => {
+                    self.metrics.record_rpc_timeout(action, started.elapsed());
                     debug!(
                         action,
                         attempt = attempt + 1,
@@ -130,11 +168,30 @@ impl BitcoinCoreChainDataSource {
         let call = Arc::new(move || client.get_block_hash(height));
         self.call_with_retry("get_block_hash", call)
     }
+
+    fn handle_tip_height(&self, tip_height: u64) {
+        if let Ok(mut cache) = self.cache.lock() {
+            if let Some(last_height) = cache.last_tip_height {
+                if tip_height < last_height {
+                    cache.utxos.clear();
+                    cache.transactions.clear();
+                    self.metrics.record_reorg(last_height, tip_height);
+                    info!(
+                        previous_height = last_height,
+                        new_height = tip_height,
+                        "chain reorg detected, cache invalidated"
+                    );
+                }
+            }
+            cache.last_tip_height = Some(tip_height);
+        }
+    }
 }
 
 impl ChainDataSource for BitcoinCoreChainDataSource {
     fn utxos_for_addresses(&self, addresses: &[String]) -> Result<Vec<UtxoEntry>, VelocityError> {
         let tip_height = self.current_height()?;
+        self.handle_tip_height(tip_height);
         let normalized_addresses = Self::normalized_addresses(addresses);
         let cache_key = UtxoCacheKey {
             addresses: normalized_addresses.clone(),
@@ -143,6 +200,7 @@ impl ChainDataSource for BitcoinCoreChainDataSource {
 
         if let Ok(cache) = self.cache.lock() {
             if let Some(cached) = cache.utxos.get(&cache_key) {
+                self.metrics.record_cache_hit("utxos");
                 debug!(
                     height = tip_height,
                     address_count = cache_key.addresses.len(),
@@ -151,6 +209,7 @@ impl ChainDataSource for BitcoinCoreChainDataSource {
                 return Ok(cached.clone());
             }
         }
+        self.metrics.record_cache_miss("utxos");
 
         info!(
             height = tip_height,
@@ -192,6 +251,13 @@ impl ChainDataSource for BitcoinCoreChainDataSource {
         start_height: u64,
         end_height: u64,
     ) -> Result<TxActivity, VelocityError> {
+        if end_height < start_height {
+            return Err(VelocityError::InvalidData(
+                "end_height cannot be less than start_height".into(),
+            ));
+        }
+        self.handle_tip_height(end_height);
+
         let normalized_addresses = Self::normalized_addresses(addresses);
         let cache_key = TxCacheKey {
             addresses: normalized_addresses.clone(),
@@ -201,6 +267,7 @@ impl ChainDataSource for BitcoinCoreChainDataSource {
 
         if let Ok(cache) = self.cache.lock() {
             if let Some(cached) = cache.transactions.get(&cache_key) {
+                self.metrics.record_cache_hit("transactions");
                 debug!(
                     start_height,
                     end_height,
@@ -213,6 +280,7 @@ impl ChainDataSource for BitcoinCoreChainDataSource {
                 });
             }
         }
+        self.metrics.record_cache_miss("transactions");
 
         info!(
             start_height,
@@ -240,20 +308,33 @@ impl ChainDataSource for BitcoinCoreChainDataSource {
                 continue;
             }
 
-            let address_matches = tx
-                .address
-                .as_ref()
-                .map(|addr| address_set.contains(&addr.to_string()))
-                .unwrap_or(false);
+            let address = match tx.address.as_ref() {
+                Some(addr) => addr,
+                None => {
+                    self.metrics.record_partial_response("list_since_block_missing_address");
+                    debug!("list_since_block missing address for send tx");
+                    continue;
+                }
+            };
+
+            let address_matches = address_set.contains(&address.to_string());
 
             if !address_matches {
                 continue;
             }
 
-            if let Some(block_height) = tx.blockheight {
-                if block_height < start_height || block_height > end_height {
+            let block_height = match tx.blockheight {
+                Some(block_height) => block_height,
+                None => {
+                    self.metrics
+                        .record_partial_response("list_since_block_missing_blockheight");
+                    debug!("list_since_block missing blockheight for send tx");
                     continue;
                 }
+            };
+
+            if block_height < start_height || block_height > end_height {
+                continue;
             }
 
             count_outgoing = count_outgoing.saturating_add(1);
@@ -298,6 +379,7 @@ impl Default for RpcConfig {
 struct CacheState {
     utxos: HashMap<UtxoCacheKey, Vec<UtxoEntry>>,
     transactions: HashMap<TxCacheKey, TxActivity>,
+    last_tip_height: Option<u64>,
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -311,4 +393,109 @@ struct TxCacheKey {
     addresses: Vec<String>,
     start_height: u64,
     end_height: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum RpcFailureClass {
+    Transient,
+    Permanent,
+}
+
+#[derive(Debug, Default)]
+struct Metrics {
+    rpc_success: std::sync::atomic::AtomicU64,
+    rpc_failure_transient: std::sync::atomic::AtomicU64,
+    rpc_failure_permanent: std::sync::atomic::AtomicU64,
+    rpc_timeout: std::sync::atomic::AtomicU64,
+    cache_hit: std::sync::atomic::AtomicU64,
+    cache_miss: std::sync::atomic::AtomicU64,
+    reorg_detected: std::sync::atomic::AtomicU64,
+    partial_response: std::sync::atomic::AtomicU64,
+    pruned_node: std::sync::atomic::AtomicU64,
+    rpc_latency_ms_total: std::sync::atomic::AtomicU64,
+    rpc_latency_ms_count: std::sync::atomic::AtomicU64,
+}
+
+impl Metrics {
+    fn record_rpc_success(&self, action: &'static str, elapsed: Duration) {
+        self.rpc_success
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        self.record_rpc_latency(elapsed);
+        debug!(action, elapsed_ms = elapsed.as_millis(), "rpc success");
+    }
+
+    fn record_rpc_failure(
+        &self,
+        action: &'static str,
+        class: RpcFailureClass,
+        elapsed: Duration,
+    ) {
+        match class {
+            RpcFailureClass::Transient => {
+                self.rpc_failure_transient
+                    .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            }
+            RpcFailureClass::Permanent => {
+                self.rpc_failure_permanent
+                    .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            }
+        }
+        self.record_rpc_latency(elapsed);
+        debug!(
+            action,
+            failure_class = ?class,
+            elapsed_ms = elapsed.as_millis(),
+            "rpc failure"
+        );
+    }
+
+    fn record_rpc_timeout(&self, action: &'static str, elapsed: Duration) {
+        self.rpc_timeout
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        self.record_rpc_latency(elapsed);
+        debug!(
+            action,
+            elapsed_ms = elapsed.as_millis(),
+            "rpc timeout"
+        );
+    }
+
+    fn record_rpc_latency(&self, elapsed: Duration) {
+        self.rpc_latency_ms_total.fetch_add(
+            elapsed.as_millis() as u64,
+            std::sync::atomic::Ordering::Relaxed,
+        );
+        self.rpc_latency_ms_count
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    }
+
+    fn record_cache_hit(&self, name: &'static str) {
+        self.cache_hit
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        debug!(cache = name, "cache hit");
+    }
+
+    fn record_cache_miss(&self, name: &'static str) {
+        self.cache_miss
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        debug!(cache = name, "cache miss");
+    }
+
+    fn record_reorg(&self, previous: u64, current: u64) {
+        self.reorg_detected
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        debug!(previous, current, "reorg detected");
+    }
+
+    fn record_partial_response(&self, name: &'static str) {
+        self.partial_response
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        debug!(partial = name, "partial rpc response");
+    }
+
+    fn record_pruned_node(&self, action: &'static str) {
+        self.pruned_node
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        debug!(action, "pruned node detected");
+    }
 }
