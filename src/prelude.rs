@@ -11,3 +11,4 @@ pub use crate::rbi_engine::{
     RBIEngine,
     RBIError,
 };
+pub use crate::sqlite_participant_registry::SqliteParticipantRegistry;
