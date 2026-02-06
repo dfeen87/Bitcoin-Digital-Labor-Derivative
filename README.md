@@ -250,33 +250,65 @@ let passes = votes_for > (total_voting_power / 2);
 
 ## Roadmap
 
-### Phase 1: Foundation
-- [x] Core derivative engine implementation
-- [x] Bitcoin integration layer
-- [x] Miner coordination framework
-- [x] Test suite and benchmarks
-- [ ] Documentation and examples
+This roadmap reflects the current state of the project following the **v1.0.0 stable release**.  
+Future work is **additive** and will not modify protocol economics or public APIs without a major version bump.
 
-### Phase 2: Testnet Deployment
-- [ ] Testnet integration
-- [ ] Bitcoin Core RPC implementation
-- [ ] UTXO analysis engine
-- [ ] Basic web dashboard
-- [ ] Miner onboarding tools
+---
 
-### Phase 3: Mainnet Preparation
-- [ ] Security audits
-- [ ] Lightning Network integration
-- [ ] Advanced governance mechanisms
-- [ ] Mobile/desktop wallets
-- [ ] API documentation
+### Phase 1: Foundation (v1.0.0) — ✅ Complete
 
-### Phase 4: Mainnet Launch
-- [ ] Mainnet deployment
-- [ ] Miner coalition formation
-- [ ] Public distribution pools
-- [ ] Real-time R.B.I. tracking
-- [ ] Economic impact monitoring
+- [x] Protocol-complete economic model
+- [x] Velocity-based scoring with bounded multipliers
+- [x] Time-weighted trust coefficients
+- [x] Recession Bypass Index (RBI) computation and alerts
+- [x] Bitcoin Core–backed chain data integration (read-only)
+- [x] SQLite-backed participant registry
+- [x] Production-safe RPC handling (bounded queries, reorg awareness)
+- [x] Security model and threat boundaries documented
+- [x] Architecture, analysis, and formal protocol specification
+
+---
+
+### Phase 2: Network Integration & Tooling (v1.1.x)
+
+- [ ] Additional chain data adapters (Esplora, Electrum, custom indexers)
+- [ ] Testnet-focused deployment guides and configuration profiles
+- [ ] Operator tooling (CLI helpers, diagnostics, metrics export)
+- [ ] Improved registry backends (alternative storage engines)
+- [ ] Extended test coverage for adapters and failure modes
+
+---
+
+### Phase 3: Oracle & Monitoring Extensions (v1.2.x)
+
+- [ ] HTTP- or oracle-backed economic data providers
+- [ ] Oracle data validation and aggregation strategies
+- [ ] Enhanced RBI trend analysis and reporting
+- [ ] External monitoring and alerting integrations
+- [ ] Historical analytics and replay tooling
+
+---
+
+### Phase 4: Ecosystem & Governance Extensions (v1.3.x+)
+
+- [ ] Miner coordination tooling and dashboards
+- [ ] Parameter governance workflows (without protocol changes)
+- [ ] Public-facing analytics and visualization
+- [ ] Documentation for third-party integrations
+- [ ] Long-term economic impact studies
+
+---
+
+### Beyond v1.x
+
+Any changes to:
+- core economic formulas
+- trust or velocity invariants
+- public trait interfaces
+- security assumptions
+
+will require a **v2.0.0 major release**.
+
 
 ## Security Considerations
 
