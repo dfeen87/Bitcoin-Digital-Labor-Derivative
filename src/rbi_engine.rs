@@ -71,7 +71,6 @@ pub struct RBIEngine<P: EconomicDataProvider> {
     provider: P,
     thresholds: AlertThresholds,
     history: Vec<RBISnapshot>,
-    latest: Option<RBISnapshot>,
 }
 
 impl<P: EconomicDataProvider> RBIEngine<P> {
@@ -80,7 +79,6 @@ impl<P: EconomicDataProvider> RBIEngine<P> {
             provider,
             thresholds: AlertThresholds::default(),
             history: Vec::new(),
-            latest: None,
         }
     }
 
@@ -90,7 +88,7 @@ impl<P: EconomicDataProvider> RBIEngine<P> {
     }
 
     pub fn latest(&self) -> Option<&RBISnapshot> {
-        self.latest.as_ref()
+        self.history.last()
     }
 
     pub fn history(&self) -> &[RBISnapshot] {
@@ -167,7 +165,6 @@ impl<P: EconomicDataProvider> RBIEngine<P> {
         };
 
         self.history.push(snapshot.clone());
-        self.latest = Some(snapshot.clone());
         Ok(snapshot)
     }
 
