@@ -20,6 +20,8 @@ pub fn weighted_utxo_age_days(utxos: &[UtxoEntry], current_height: u64) -> f64 {
         return 0.0;
     }
 
+    const BLOCK_TO_DAYS: f64 = 10.0 / 60.0 / 24.0;
+
     let mut total_sats: u128 = 0;
     let mut weighted_sum_days: f64 = 0.0;
 
@@ -31,7 +33,7 @@ pub fn weighted_utxo_age_days(utxos: &[UtxoEntry], current_height: u64) -> f64 {
 
         let age_blocks = current_height.saturating_sub(u.height);
         // 10 min/block -> days
-        let age_days = (age_blocks as f64) * (10.0 / 60.0 / 24.0);
+        let age_days = (age_blocks as f64) * BLOCK_TO_DAYS;
 
         total_sats += sats;
         weighted_sum_days += (sats as f64) * age_days;

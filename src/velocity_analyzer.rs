@@ -107,8 +107,9 @@ impl<R: ParticipantRegistry, C: ChainDataSource> VelocityAnalyzer<R, C> {
         }
 
         let data = self.analyze(participant_id, current_height)?;
-        self.cache.insert(participant_id.to_string(), data.clone());
-        Ok(data.velocity_multiplier)
+        let multiplier = data.velocity_multiplier;
+        self.cache.insert(participant_id.to_string(), data);
+        Ok(multiplier)
     }
 
     pub fn analyze(
