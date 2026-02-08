@@ -5,6 +5,8 @@ use chrono::{DateTime, Utc};
 use rust_decimal::prelude::ToPrimitive;
 use serde::Serialize;
 
+const MIN_DEMAND_THRESHOLD: f64 = 1e-9;
+
 #[derive(Debug, Clone)]
 pub struct ParticipantSnapshot {
     pub participant_id: String,
@@ -180,7 +182,7 @@ impl<P: EconomicDataProvider> RBIEngine<P> {
             return Err(RBIError::InvalidState("t_c must be finite and > 0".into()));
         }
 
-        if d_s.abs() < f64::EPSILON {
+        if d_s.abs() < MIN_DEMAND_THRESHOLD {
             let snapshot = RBISnapshot {
                 timestamp,
                 block_height: current_height,
