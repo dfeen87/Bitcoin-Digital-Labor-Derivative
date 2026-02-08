@@ -37,8 +37,8 @@ pub struct VelocityData {
     pub utxo_age_weighted_avg_days: f64,
     pub tx_count_window: u32,
     pub tx_volume_window: Amount,
-    pub velocity_score: f64,           // [0,1]
-    pub velocity_multiplier: Decimal,  // [min,max]
+    pub velocity_score: f64,          // [0,1]
+    pub velocity_multiplier: Decimal, // [min,max]
     pub last_updated_height: u64,
 }
 
@@ -125,14 +125,15 @@ impl<R: ParticipantRegistry, C: ChainDataSource> VelocityAnalyzer<R, C> {
         }
 
         let utxos = self.chain.utxos_for_addresses(&addresses)?;
-        let age_days = weighted_utxo_age_days(&utxos, current_height);
+        let age_days = weighted_utxo_age_days(&utxos, current_height)
+            .map_err(|err| VelocityError::InvalidData(err.to_string()))?;
         let freshness = utxo_freshness_score(age_days);
 
         let window_blocks = self.cfg.window_blocks();
         let start_height = current_height.saturating_sub(window_blocks);
-        let activity = self
-            .chain
-            .outgoing_activity_for_addresses(&addresses, start_height, current_height)?;
+        let activity =
+            self.chain
+                .outgoing_activity_for_addresses(&addresses, start_height, current_height)?;
 
         let tx_frequency_score = if self.cfg.max_tx_threshold == 0 {
             0.0
@@ -193,7 +194,10 @@ mod tests {
     struct MockChain;
 
     impl ChainDataSource for MockChain {
-        fn utxos_for_addresses(&self, _addresses: &[String]) -> Result<Vec<UtxoEntry>, VelocityError> {
+        fn utxos_for_addresses(
+            &self,
+            _addresses: &[String],
+        ) -> Result<Vec<UtxoEntry>, VelocityError> {
             let txid = Txid::from_slice(&[2u8; 32]).unwrap();
             Ok(vec![UtxoEntry {
                 txid,
@@ -220,7 +224,9 @@ mod tests {
     fn multiplier_stays_in_bounds() {
         let cfg = VelocityConfig::default();
         let mut analyzer = VelocityAnalyzer::new(cfg, MockRegistry, MockChain).unwrap();
-        let m = analyzer.calculate_velocity_multiplier("alice", 1000).unwrap();
+        let m = analyzer
+            .calculate_velocity_multiplier("alice", 1000)
+            .unwrap();
         assert!(m >= Decimal::new(10, 1));
         assert!(m <= Decimal::new(15, 1));
     }

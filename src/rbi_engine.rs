@@ -1,6 +1,9 @@
 use crate::alerts::{evaluate_alert, AlertThresholds, RBIAlert};
 use crate::economic_oracle::{EconomicDataProvider, EconomicError};
+use crate::velocity_config::VelocityConfig;
 use chrono::{DateTime, Utc};
+use rust_decimal::prelude::ToPrimitive;
+use serde::Serialize;
 
 #[derive(Debug, Clone)]
 pub struct ParticipantSnapshot {
@@ -38,8 +41,18 @@ pub struct RBISnapshot {
     pub productivity_a: f64,
 
     pub rbi_value: f64,
+    pub status: RbiStatus,
     pub is_healthy: bool,
     pub alert: Option<RBIAlert>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+pub enum RbiStatus {
+    Healthy,
+    Warning,
+    Critical,
+    Indeterminate,
+    Invalid,
 }
 
 #[derive(Debug)]
@@ -70,6 +83,7 @@ impl std::error::Error for RBIError {}
 pub struct RBIEngine<P: EconomicDataProvider> {
     provider: P,
     thresholds: AlertThresholds,
+    velocity_config: VelocityConfig,
     history: Vec<RBISnapshot>,
 }
 
@@ -78,12 +92,18 @@ impl<P: EconomicDataProvider> RBIEngine<P> {
         Self {
             provider,
             thresholds: AlertThresholds::default(),
+            velocity_config: VelocityConfig::default(),
             history: Vec::new(),
         }
     }
 
     pub fn with_thresholds(mut self, thresholds: AlertThresholds) -> Self {
         self.thresholds = thresholds;
+        self
+    }
+
+    pub fn with_velocity_config(mut self, cfg: VelocityConfig) -> Self {
+        self.velocity_config = cfg;
         self
     }
 
@@ -100,29 +120,81 @@ impl<P: EconomicDataProvider> RBIEngine<P> {
         pool_state: &DistributionPoolState,
         current_height: u64,
     ) -> Result<RBISnapshot, RBIError> {
+        let timestamp = Utc::now();
+        self.calculate_rbi_at(pool_state, current_height, timestamp)
+    }
+
+    pub fn calculate_rbi_at(
+        &mut self,
+        pool_state: &DistributionPoolState,
+        current_height: u64,
+        timestamp: DateTime<Utc>,
+    ) -> Result<RBISnapshot, RBIError> {
         if pool_state.epoch_duration_days == 0 {
             return Err(RBIError::InvalidState(
                 "epoch_duration_days must be > 0".into(),
             ));
         }
 
-        let v_dld = self.calculate_dld_velocity(pool_state)?;
-        let t_c = self.calculate_system_trust(pool_state)?;
-
         let d_s = self.provider.demand_shock_rate()?;
         let a = self.provider.productivity_expansion()?;
 
-        if !v_dld.is_finite() || v_dld < 0.0 {
-            return Err(RBIError::InvalidState("v_dld must be finite and >= 0".into()));
-        }
-        if !t_c.is_finite() || t_c <= 0.0 {
-            return Err(RBIError::InvalidState("t_c must be finite and > 0".into()));
-        }
         if !d_s.is_finite() || d_s < 0.0 {
             return Err(RBIError::InvalidState("d_s must be finite and >= 0".into()));
         }
         if !a.is_finite() {
             return Err(RBIError::InvalidState("A must be finite".into()));
+        }
+
+        let total_stake: u64 = pool_state
+            .participants
+            .iter()
+            .map(|p| p.stake_amount_sats)
+            .sum();
+        if pool_state.participants.is_empty() || total_stake == 0 {
+            let snapshot = RBISnapshot {
+                timestamp,
+                block_height: current_height,
+                v_dld: 0.0,
+                t_c: 1.0,
+                d_s,
+                productivity_a: a,
+                rbi_value: 0.0,
+                status: RbiStatus::Indeterminate,
+                is_healthy: false,
+                alert: None,
+            };
+            self.history.push(snapshot.clone());
+            return Ok(snapshot);
+        }
+
+        let v_dld = self.calculate_dld_velocity(pool_state)?;
+        let t_c = self.calculate_system_trust(pool_state)?;
+
+        if !v_dld.is_finite() || v_dld < 0.0 {
+            return Err(RBIError::InvalidState(
+                "v_dld must be finite and >= 0".into(),
+            ));
+        }
+        if !t_c.is_finite() || t_c <= 0.0 {
+            return Err(RBIError::InvalidState("t_c must be finite and > 0".into()));
+        }
+
+        if d_s.abs() < f64::EPSILON {
+            let snapshot = RBISnapshot {
+                timestamp,
+                block_height: current_height,
+                v_dld,
+                t_c,
+                d_s,
+                productivity_a: a,
+                rbi_value: 0.0,
+                status: RbiStatus::Indeterminate,
+                is_healthy: false,
+                alert: None,
+            };
+            self.history.push(snapshot.clone());
+            return Ok(snapshot);
         }
 
         // RBI = (V_DLD × T_c) / (D_s / e^A)
@@ -133,34 +205,44 @@ impl<P: EconomicDataProvider> RBIEngine<P> {
             return Err(RBIError::Calculation("e^A invalid".into()));
         }
 
-        let denominator = if d_s.abs() < f64::EPSILON {
-            // No deflation -> effectively infinite RBI if numerator > 0
-            0.0
+        let denominator = d_s / exp_a;
+        let mut rbi_value = numerator / denominator;
+
+        let mut status = if !rbi_value.is_finite() {
+            RbiStatus::Invalid
+        } else if rbi_value < self.thresholds.critical_low {
+            RbiStatus::Critical
+        } else if rbi_value < self.thresholds.warning_low {
+            RbiStatus::Warning
+        } else if rbi_value > self.thresholds.overheating_high {
+            RbiStatus::Warning
         } else {
-            d_s / exp_a
+            RbiStatus::Healthy
         };
 
-        let rbi_value = if denominator.abs() < f64::EPSILON {
-            if numerator.abs() < f64::EPSILON {
-                0.0
-            } else {
-                f64::INFINITY
-            }
-        } else {
-            numerator / denominator
-        };
+        if !rbi_value.is_finite() {
+            status = RbiStatus::Invalid;
+            rbi_value = 0.0;
+        }
 
-        let alert = evaluate_alert(rbi_value, &self.thresholds);
+        let is_healthy = rbi_value >= self.thresholds.warning_low
+            && !matches!(status, RbiStatus::Invalid | RbiStatus::Indeterminate);
+        let alert = if matches!(status, RbiStatus::Invalid | RbiStatus::Indeterminate) {
+            None
+        } else {
+            evaluate_alert(rbi_value, &self.thresholds)
+        };
 
         let snapshot = RBISnapshot {
-            timestamp: Utc::now(),
+            timestamp,
             block_height: current_height,
             v_dld,
             t_c,
             d_s,
             productivity_a: a,
             rbi_value,
-            is_healthy: rbi_value >= self.thresholds.warning_low,
+            status,
+            is_healthy,
             alert,
         };
 
@@ -182,12 +264,24 @@ impl<P: EconomicDataProvider> RBIEngine<P> {
             ));
         }
 
-        Ok((total_distributed * avg_velocity) / epoch_days) // sats/day adjusted
+        let min_velocity = self
+            .velocity_config
+            .min_velocity_multiplier
+            .to_f64()
+            .ok_or_else(|| RBIError::InvalidState("min velocity conversion failed".into()))?;
+        let max_velocity = self
+            .velocity_config
+            .max_velocity_multiplier
+            .to_f64()
+            .ok_or_else(|| RBIError::InvalidState("max velocity conversion failed".into()))?;
+        let clamped_velocity = avg_velocity.clamp(min_velocity, max_velocity);
+
+        Ok((total_distributed * clamped_velocity) / epoch_days) // sats/day adjusted
     }
 
     fn calculate_system_trust(&self, pool_state: &DistributionPoolState) -> Result<f64, RBIError> {
         if pool_state.participants.is_empty() {
-            return Ok(1.0); // neutral baseline
+            return Ok(1.0); // neutral baseline (indeterminate handled upstream)
         }
 
         let mut weighted_sum = 0.0;
@@ -238,6 +332,7 @@ mod tests {
         };
 
         let snap = engine.calculate_rbi(&state, 800_000).unwrap();
-        assert!(snap.rbi_value.is_finite() || snap.rbi_value.is_infinite());
+        assert!(snap.rbi_value.is_finite());
+        assert!(snap.is_healthy);
     }
 }
