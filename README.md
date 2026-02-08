@@ -331,6 +331,27 @@ cargo clippy --all-targets --all-features
 cargo tarpaulin --all-features
 ```
 
+## Continuous Integration
+
+The CI pipeline runs a minimal, deterministic workflow to keep the core logic correct and reproducible:
+
+- **Build:** Compiles the project with `cargo build --locked`.
+- **Tests:** Runs the core unit tests and deterministic simulations with `cargo test --locked --all`.
+- **Determinism:** Verifies the deterministic simulation test suite (e.g., `tests/simulation_determinism.rs`) remains stable.
+
+CI intentionally does **not** run:
+
+- Live blockchain calls or external network dependencies.
+- Performance benchmarks or timing-sensitive tests.
+- Heavy integration tests requiring extra infrastructure.
+
+To reproduce the CI checks locally:
+
+```bash
+cargo build --locked
+cargo test --locked --all
+```
+
 ## Further Reading
 
 - [Technical Whitepaper](docs/WHITEPAPER.md) - Full mathematical specification
