@@ -105,6 +105,7 @@ fn validate_schema(conn: &Connection) -> Result<(), VelocityError> {
 
     ensure_columns(conn, "participants", PARTICIPANTS_COLUMNS)?;
     ensure_columns(conn, "participant_addresses", ADDRESS_COLUMNS)?;
+    ensure_unique_addresses(conn)?;
     Ok(())
 }
 
@@ -135,5 +136,33 @@ fn ensure_columns(
         }
     }
 
+    Ok(())
+}
+
+fn ensure_unique_addresses(conn: &Connection) -> Result<(), VelocityError> {
+    let mut stmt = conn
+        .prepare(
+            "SELECT address, COUNT(DISTINCT participant_id) as cnt \
+             FROM participant_addresses \
+             GROUP BY address \
+             HAVING cnt > 1 \
+             ORDER BY address ASC \
+             LIMIT 1",
+        )
+        .map_err(|err| VelocityError::DataSource(err.to_string()))?;
+    let mut rows = stmt
+        .query([])
+        .map_err(|err| VelocityError::DataSource(err.to_string()))?;
+    if let Some(row) = rows
+        .next()
+        .map_err(|err| VelocityError::DataSource(err.to_string()))?
+    {
+        let address: String = row
+            .get(0)
+            .map_err(|err| VelocityError::DataSource(err.to_string()))?;
+        return Err(VelocityError::InvalidData(format!(
+            "address reused across participants: {address}"
+        )));
+    }
     Ok(())
 }

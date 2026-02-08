@@ -1,5 +1,5 @@
-use bitcoin::Txid;
 use bitcoin::util::amount::Amount;
+use bitcoin::Txid;
 
 /// Basic UTXO entry needed for freshness computations.
 /// Height is when the UTXO was created.
@@ -11,13 +11,40 @@ pub struct UtxoEntry {
     pub height: u64,
 }
 
+#[derive(Debug, Clone)]
+pub enum UtxoAgeError {
+    FutureHeight {
+        utxo_height: u64,
+        current_height: u64,
+    },
+}
+
+impl std::fmt::Display for UtxoAgeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            UtxoAgeError::FutureHeight {
+                utxo_height,
+                current_height,
+            } => write!(
+                f,
+                "utxo height {utxo_height} exceeds current height {current_height}"
+            ),
+        }
+    }
+}
+
+impl std::error::Error for UtxoAgeError {}
+
 /// Compute the value-weighted average UTXO age in days.
 ///
 /// - Weighted by satoshi value to reflect economic significance.
 /// - Uses a block-time approximation (10 minutes/block).
-pub fn weighted_utxo_age_days(utxos: &[UtxoEntry], current_height: u64) -> f64 {
+pub fn weighted_utxo_age_days(
+    utxos: &[UtxoEntry],
+    current_height: u64,
+) -> Result<f64, UtxoAgeError> {
     if utxos.is_empty() {
-        return 0.0;
+        return Ok(0.0);
     }
 
     const BLOCK_TO_DAYS: f64 = 10.0 / 60.0 / 24.0;
@@ -26,6 +53,13 @@ pub fn weighted_utxo_age_days(utxos: &[UtxoEntry], current_height: u64) -> f64 {
     let mut weighted_sum_days: f64 = 0.0;
 
     for u in utxos {
+        if u.height > current_height {
+            return Err(UtxoAgeError::FutureHeight {
+                utxo_height: u.height,
+                current_height,
+            });
+        }
+
         let sats = u.amount.to_sat() as u128;
         if sats == 0 {
             continue;
@@ -40,9 +74,9 @@ pub fn weighted_utxo_age_days(utxos: &[UtxoEntry], current_height: u64) -> f64 {
     }
 
     if total_sats == 0 {
-        0.0
+        Ok(0.0)
     } else {
-        weighted_sum_days / (total_sats as f64)
+        Ok(weighted_sum_days / (total_sats as f64))
     }
 }
 
@@ -80,11 +114,21 @@ mod tests {
         let txid = Txid::from_slice(&[1u8; 32]).unwrap();
 
         let utxos = vec![
-            UtxoEntry { txid, vout: 0, amount: Amount::from_sat(100_000_000), height: 900 }, // older, big
-            UtxoEntry { txid, vout: 1, amount: Amount::from_sat(10_000_000), height: 990 },  // newer, small
+            UtxoEntry {
+                txid,
+                vout: 0,
+                amount: Amount::from_sat(100_000_000),
+                height: 900,
+            }, // older, big
+            UtxoEntry {
+                txid,
+                vout: 1,
+                amount: Amount::from_sat(10_000_000),
+                height: 990,
+            }, // newer, small
         ];
 
-        let age = weighted_utxo_age_days(&utxos, current_height);
+        let age = weighted_utxo_age_days(&utxos, current_height).unwrap();
         assert!(age > 0.0);
     }
 }

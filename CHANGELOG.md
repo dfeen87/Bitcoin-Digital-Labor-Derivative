@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Deterministic simulation harness with offline scenarios and JSON reporting.
+- Recorded economic snapshot provider for deterministic oracle inputs.
+
+### Changed
+- RBI engine enforces indeterminate status for near-zero demand shock and empty/zero-stake pools, and clamps velocity using configured bounds.
+- UTXO age computation rejects future-height entries.
+- SQLite participant registry rejects address reuse across participants.
+
 ## v1.0.0 — Initial Stable Release
 
 ### Added

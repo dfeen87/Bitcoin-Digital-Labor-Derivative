@@ -1,3 +1,4 @@
+use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
 #[derive(Debug)]
@@ -102,5 +103,49 @@ impl EconomicDataProvider for MockEconomicDataProvider {
 
     fn productivity_expansion(&self) -> Result<f64, EconomicError> {
         Ok(self.productivity)
+    }
+}
+
+/// Deterministic, recorded snapshot for offline simulations.
+#[derive(Debug, Clone, Copy)]
+pub struct RecordedEconomicSnapshot {
+    pub demand_shock: f64,
+    pub productivity: f64,
+}
+
+/// Snapshot-backed provider to avoid time-based caching or external variability.
+#[derive(Debug)]
+pub struct RecordedEconomicProvider {
+    snapshot: Mutex<RecordedEconomicSnapshot>,
+}
+
+impl RecordedEconomicProvider {
+    pub fn new(snapshot: RecordedEconomicSnapshot) -> Self {
+        Self {
+            snapshot: Mutex::new(snapshot),
+        }
+    }
+
+    pub fn set_snapshot(&self, snapshot: RecordedEconomicSnapshot) {
+        if let Ok(mut guard) = self.snapshot.lock() {
+            *guard = snapshot;
+        }
+    }
+
+    fn get_snapshot(&self) -> Result<RecordedEconomicSnapshot, EconomicError> {
+        self.snapshot
+            .lock()
+            .map(|guard| *guard)
+            .map_err(|_| EconomicError::Provider("snapshot lock poisoned".into()))
+    }
+}
+
+impl EconomicDataProvider for RecordedEconomicProvider {
+    fn demand_shock_rate(&self) -> Result<f64, EconomicError> {
+        Ok(self.get_snapshot()?.demand_shock)
+    }
+
+    fn productivity_expansion(&self) -> Result<f64, EconomicError> {
+        Ok(self.get_snapshot()?.productivity)
     }
 }
