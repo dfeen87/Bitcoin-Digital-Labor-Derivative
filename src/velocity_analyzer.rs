@@ -1,6 +1,6 @@
 use crate::utxo_scoring::{utxo_freshness_score, weighted_utxo_age_days, UtxoEntry};
 use crate::velocity_config::VelocityConfig;
-use bitcoin::util::amount::Amount;
+use bitcoin::Amount;
 use rust_decimal::Decimal;
 use std::collections::HashMap;
 

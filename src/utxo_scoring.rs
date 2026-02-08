@@ -1,4 +1,4 @@
-use bitcoin::util::amount::Amount;
+use bitcoin::Amount;
 use bitcoin::Txid;
 
 /// Basic UTXO entry needed for freshness computations.
