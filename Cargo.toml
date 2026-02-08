@@ -1,0 +1,27 @@
+[package]
+name = "bitcoin-digital-labor-derivative"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Deterministic economic core and simulation framework for Bitcoin Digital Labor Derivative"
+authors = ["Don Feeney"]
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "sim"
+path = "src/bin/sim.rs"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Optional but already implied by current code usage
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+# SQLite registry likely needs this
+rusqlite = { version = "0.30", features = ["bundled"] }
+
+[dev-dependencies]
+pretty_assertions = "1.4"
