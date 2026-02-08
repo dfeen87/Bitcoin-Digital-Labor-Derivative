@@ -27,3 +27,6 @@ rusqlite = { version = "0.30", features = ["bundled"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4"
+
+[features]
+rpc = []

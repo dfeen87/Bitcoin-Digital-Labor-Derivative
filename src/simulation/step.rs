@@ -8,7 +8,7 @@ use crate::velocity_analyzer::{
     ChainDataSource, ParticipantRegistry, TxActivity, VelocityAnalyzer, VelocityError,
 };
 use crate::velocity_config::VelocityConfig;
-use bitcoin::util::amount::Amount;
+use bitcoin::Amount;
 use chrono::TimeZone;
 use rust_decimal::prelude::ToPrimitive;
 use std::collections::{BTreeMap, HashMap};
