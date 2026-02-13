@@ -163,7 +163,6 @@ impl BitcoinCoreChainDataSource {
         let client = self.client.clone();
         let call = Arc::new(move || client.get_block_count());
         self.call_with_retry("get_block_count", call)
-            .map(|height| height)
     }
 
     fn block_hash_for_height(&self, height: u64) -> Result<bitcoin::BlockHash, VelocityError> {
@@ -347,7 +346,8 @@ impl ChainDataSource for BitcoinCoreChainDataSource {
             }
 
             count_outgoing = count_outgoing.saturating_add(1);
-            let amount_sats = tx.detail.amount.to_sat().max(0) as u64;
+            // For send transactions, amount is negative, so we take absolute value
+            let amount_sats = tx.detail.amount.to_sat().unsigned_abs();
             outgoing_sats = outgoing_sats.saturating_add(amount_sats);
         }
 

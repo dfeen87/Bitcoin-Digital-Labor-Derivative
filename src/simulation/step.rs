@@ -133,7 +133,10 @@ pub fn execute_step(
     let timestamp = chrono::Utc
         .timestamp_opt(input.step_index as i64, 0)
         .single()
-        .unwrap_or_else(|| chrono::Utc.timestamp_opt(0, 0).unwrap());
+        .unwrap_or_else(|| {
+            // Fallback to Unix epoch if primary timestamp is invalid
+            chrono::Utc.timestamp_opt(0, 0).single().unwrap()
+        });
 
     match engine.calculate_rbi_at(&pool_state, input.block_height, timestamp) {
         Ok(snapshot) => StepExecution {
