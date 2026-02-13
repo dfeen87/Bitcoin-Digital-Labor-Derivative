@@ -48,7 +48,7 @@ impl<P: EconomicDataProvider> CachedProvider<P> {
         }
     }
 
-    fn refresh_if_needed(&mut self) -> Result<(), EconomicError> {
+    pub fn refresh_if_needed(&mut self) -> Result<(), EconomicError> {
         let stale = match self.cached_at {
             None => true,
             Some(t) => t.elapsed() >= self.ttl,

@@ -1,8 +1,9 @@
 use crate::utxo_scoring::UtxoEntry;
 use crate::velocity_analyzer::{ChainDataSource, TxActivity, VelocityError};
-use bitcoin::util::amount::Amount;
+use bitcoin::amount::Amount;
+use bitcoin::address::NetworkUnchecked;
 use bitcoin::Address;
-use bitcoincore_rpc::json::{ListSinceBlockCategory, ScanTxOutRequest};
+use bitcoincore_rpc::json::GetTransactionResultDetailCategory;
 use bitcoincore_rpc::{Client, RpcApi};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -13,7 +14,7 @@ use tracing::{debug, info};
 /// Bitcoin Core-backed chain data source.
 #[derive(Debug, Clone)]
 pub struct BitcoinCoreChainDataSource {
-    client: Client,
+    client: Arc<Client>,
     rpc_config: RpcConfig,
     cache: Arc<Mutex<CacheState>>,
     metrics: Arc<Metrics>,
@@ -26,7 +27,7 @@ impl BitcoinCoreChainDataSource {
 
     pub fn new_with_config(client: Client, rpc_config: RpcConfig) -> Self {
         Self {
-            client,
+            client: Arc::new(client),
             rpc_config,
             cache: Arc::new(Mutex::new(CacheState::default())),
             metrics: Arc::new(Metrics::default()),
@@ -37,9 +38,11 @@ impl BitcoinCoreChainDataSource {
         addresses
             .iter()
             .map(|addr| {
-                Address::from_str(addr).map_err(|e| {
-                    VelocityError::InvalidData(format!("invalid address {addr}: {e}"))
-                })
+                Address::from_str(addr)
+                    .map_err(|e| {
+                        VelocityError::InvalidData(format!("invalid address {addr}: {e}"))
+                    })
+                    .map(|unchecked: Address<NetworkUnchecked>| unchecked.assume_checked())
             })
             .collect()
     }
@@ -71,7 +74,7 @@ impl BitcoinCoreChainDataSource {
     }
 
     fn normalized_addresses(addresses: &[String]) -> Vec<String> {
-        let mut normalized: Vec<String> = addresses.iter().cloned().collect();
+        let mut normalized: Vec<String> = addresses.to_vec();
         normalized.sort();
         normalized.dedup();
         normalized
@@ -160,7 +163,6 @@ impl BitcoinCoreChainDataSource {
         let client = self.client.clone();
         let call = Arc::new(move || client.get_block_count());
         self.call_with_retry("get_block_count", call)
-            .map(|height| height as u64)
     }
 
     fn block_hash_for_height(&self, height: u64) -> Result<bitcoin::BlockHash, VelocityError> {
@@ -218,16 +220,20 @@ impl ChainDataSource for BitcoinCoreChainDataSource {
         );
 
         let parsed_addresses = self.parse_addresses(&normalized_addresses)?;
-        let scan_objects: Vec<ScanTxOutRequest> = parsed_addresses
+        let scan_descriptors: Vec<String> = parsed_addresses
             .into_iter()
-            .map(ScanTxOutRequest::Addr)
+            .map(|addr| format!("addr({})", addr))
             .collect();
 
         let client = self.client.clone();
+        let scan_objects: Vec<bitcoincore_rpc::json::ScanTxOutRequest> = scan_descriptors
+            .iter()
+            .map(|desc| bitcoincore_rpc::json::ScanTxOutRequest::Single(desc.clone()))
+            .collect();
         let call = Arc::new(move || client.scan_tx_out_set_blocking(&scan_objects));
         let scan_result = self.call_with_retry("scan_tx_out_set", call)?;
 
-        let utxos = scan_result
+        let utxos: Vec<UtxoEntry> = scan_result
             .unspents
             .into_iter()
             .map(|unspent| UtxoEntry {
@@ -304,11 +310,11 @@ impl ChainDataSource for BitcoinCoreChainDataSource {
         let mut outgoing_sats: u64 = 0;
 
         for tx in list_result.transactions {
-            if tx.category != ListSinceBlockCategory::Send {
+            if tx.detail.category != GetTransactionResultDetailCategory::Send {
                 continue;
             }
 
-            let address = match tx.address.as_ref() {
+            let address = match tx.detail.address.as_ref() {
                 Some(addr) => addr,
                 None => {
                     self.metrics.record_partial_response("list_since_block_missing_address");
@@ -317,14 +323,16 @@ impl ChainDataSource for BitcoinCoreChainDataSource {
                 }
             };
 
-            let address_matches = address_set.contains(&address.to_string());
+            // Convert NetworkUnchecked to string via assume_checked
+            let address_str = address.clone().assume_checked().to_string();
+            let address_matches = address_set.contains(&address_str);
 
             if !address_matches {
                 continue;
             }
 
-            let block_height = match tx.blockheight {
-                Some(block_height) => block_height,
+            let block_height = match tx.info.blockheight {
+                Some(block_height) => block_height as u64,
                 None => {
                     self.metrics
                         .record_partial_response("list_since_block_missing_blockheight");
@@ -338,7 +346,9 @@ impl ChainDataSource for BitcoinCoreChainDataSource {
             }
 
             count_outgoing = count_outgoing.saturating_add(1);
-            outgoing_sats = outgoing_sats.saturating_add(tx.amount.to_sat());
+            // For send transactions, amount is negative, so we take absolute value
+            let amount_sats = tx.detail.amount.to_sat().unsigned_abs();
+            outgoing_sats = outgoing_sats.saturating_add(amount_sats);
         }
 
         let activity = TxActivity {
