@@ -1,0 +1,2 @@
+std::result::Result<std::vec::Vec<bitcoin::Address>, velocity_analyzer::VelocityError>
+std::iter::FromIterator<std::result::Result<bitcoin::Address<bitcoin::address::NetworkUnchecked>, velocity_analyzer::VelocityError>>
