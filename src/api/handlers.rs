@@ -15,7 +15,7 @@ use axum::{
 };
 use serde::Deserialize;
 
-/// Root endpoint - returns plaintext status message
+/// Root endpoint - returns plaintext status message (text/plain)
 pub async fn root() -> &'static str {
     "BDLD API is running"
 }
