@@ -127,12 +127,32 @@ cd bitcoin-digital-labor-derivative
 # Build all crates
 cargo build --release
 
+# Build with API server
+cargo build --release --features api
+
 # Run tests
 cargo test --all
 
 # Run benchmarks
 cargo bench
 ```
+
+### Running the API Server
+
+```bash
+# Start the REST API server
+cargo run --bin api-server --features api
+
+# Server will be available at http://localhost:3000
+# See docs/API.md for full API documentation
+```
+
+**Available Endpoints:**
+- `GET /health` - Health check
+- `GET /api/v1/rbi` - Current RBI status
+- `GET /api/v1/pool/balance` - Current pool balance
+- `GET /api/v1/participants/:id/dividend` - Calculate dividend
+- `GET /api/v1/participants/:id/velocity` - Get velocity data
 
 ### Example: Create a Timelocked Stake
 

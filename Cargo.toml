@@ -13,6 +13,16 @@ path = "src/lib.rs"
 name = "sim"
 path = "src/bin/sim.rs"
 
+[[bin]]
+name = "api-server"
+path = "src/bin/api_server.rs"
+required-features = ["api"]
+
+[[example]]
+name = "global_node_usage"
+path = "examples/global_node_usage.rs"
+required-features = ["api"]
+
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -29,8 +39,16 @@ rusqlite = { version = "0.30", features = ["bundled"] }
 bitcoincore-rpc = { version = "0.17", optional = true }
 tracing = { version = "0.1", optional = true }
 
+# REST API dependencies
+axum = { version = "0.7", optional = true }
+tokio = { version = "1", features = ["full"], optional = true }
+tower = { version = "0.4", optional = true }
+tower-http = { version = "0.5", features = ["cors"], optional = true }
+tracing-subscriber = { version = "0.3", optional = true }
+
 [dev-dependencies]
 pretty_assertions = "1.4"
 
 [features]
 rpc = ["bitcoincore-rpc", "tracing"]
+api = ["axum", "tokio", "tower", "tower-http", "tracing", "tracing-subscriber"]
