@@ -68,8 +68,15 @@ fn main() {
     let trust_coefficient = 1.5;
     let velocity_multiplier = 1.2;
 
+    // Using the formula: D̂ᵢ = P̂ · (pᵢ·Tᵢ / Σ) · Vᵢ
     let weighted_stake = stake_amount as f64 * trust_coefficient;
-    let dividend_sats = ((pool_balance_sats as f64) * velocity_multiplier) as u64;
+    
+    // For simplicity, assume this is the only participant (Σ = pᵢ·Tᵢ)
+    // In a real system with multiple participants, we'd sum all weighted stakes
+    let total_weighted_stakes = weighted_stake;
+    let proportion = weighted_stake / total_weighted_stakes; // = 1.0 for single participant
+    
+    let dividend_sats = ((pool_balance_sats as f64) * proportion * velocity_multiplier) as u64;
 
     println!("✓ Dividend Calculation:");
     println!("  - Participant: alice");
@@ -77,6 +84,7 @@ fn main() {
     println!("  - Trust Coefficient: {:.2}x", trust_coefficient);
     println!("  - Velocity Multiplier: {:.2}x", velocity_multiplier);
     println!("  - Weighted Stake: {:.2} sats", weighted_stake);
+    println!("  - Proportion: {:.4} (assuming single participant)", proportion);
     println!("  - Dividend: {} sats ({:.8} BTC)", dividend_sats, dividend_sats as f64 / 100_000_000.0);
 
     println!("\n✓ Example complete!");
