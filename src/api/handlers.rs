@@ -79,10 +79,13 @@ pub async fn get_participant_dividend(
     // Calculate dividend using the formula: D̂ᵢ = P̂ · (pᵢ·Tᵢ / Σ) · Vᵢ
     let pool_balance = node.get_pool_balance();
     
-    // For simplicity, assume this is the only participant (Σ = pᵢ·Tᵢ)
-    // In a real implementation, we'd sum all participants' weighted stakes
+    // TODO: This is a simplified implementation that assumes a single participant.
+    // For production use, this should:
+    // 1. Query the participant registry to get all active participants
+    // 2. Calculate the sum of all weighted stakes (Σ = sum of all pⱼ·Tⱼ)
+    // 3. Use the actual proportion for this participant
     let weighted_stake = stake_amount_sats as f64 * trust_coefficient;
-    let total_weighted_stakes = weighted_stake; // Simplified for single participant
+    let total_weighted_stakes = weighted_stake; // FIXME: Should sum all participants
     
     let dividend_sats = if total_weighted_stakes > 0.0 {
         let proportion = weighted_stake / total_weighted_stakes;
