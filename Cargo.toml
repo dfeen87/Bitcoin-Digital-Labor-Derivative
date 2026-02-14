@@ -42,13 +42,14 @@ tracing = { version = "0.1", optional = true }
 # REST API dependencies
 axum = { version = "0.7", optional = true }
 tokio = { version = "1", features = ["full"], optional = true }
-tower = { version = "0.4", optional = true }
+tower = { version = "0.4", optional = true, features = ["limit"] }
 tower-http = { version = "0.5", features = ["cors"], optional = true }
 tracing-subscriber = { version = "0.3", optional = true }
+uuid = { version = "1.0", features = ["v4"], optional = true }
 
 [dev-dependencies]
 pretty_assertions = "1.4"
 
 [features]
 rpc = ["bitcoincore-rpc", "tracing"]
-api = ["axum", "tokio", "tower", "tower-http", "tracing", "tracing-subscriber"]
+api = ["axum", "tokio", "tower", "tower-http", "tracing", "tracing-subscriber", "uuid"]
