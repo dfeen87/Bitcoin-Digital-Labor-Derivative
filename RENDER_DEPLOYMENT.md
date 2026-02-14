@@ -285,9 +285,11 @@ For production workloads, consider upgrading:
 ❌ **Disabled by Default:**
 - JWT authentication (optional)
 
-### Enabling JWT Authentication
+### Enabling JWT Authentication (Future Enhancement)
 
-If you need authentication:
+**Note:** JWT authentication is not yet implemented in the current version. The following configuration is reserved for future use.
+
+If JWT authentication is added in a future version:
 
 1. Generate a secure secret:
    ```bash
@@ -301,8 +303,6 @@ If you need authentication:
    ```
 
 3. Restart your service
-
-**Note:** JWT authentication is NOT implemented in the current version. This is a placeholder for future enhancement.
 
 ### Production Security Checklist
 

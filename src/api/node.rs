@@ -136,10 +136,9 @@ impl GlobalNode {
     pub fn get_labor_history(&self, page: u32, page_size: u32) -> Vec<LaborHistoryEntry> {
         if let Ok(history) = self.labor_history.read() {
             let start = (page * page_size) as usize;
-            let end = ((page + 1) * page_size) as usize;
             history.iter()
                 .skip(start)
-                .take(end.saturating_sub(start))
+                .take(page_size as usize)
                 .cloned()
                 .collect()
         } else {

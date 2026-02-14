@@ -157,7 +157,9 @@ pub async fn get_labor_state(
     let participant_states: Vec<ParticipantState> = participants
         .iter()
         .map(|p| {
-            let velocity = 1.0; // Default velocity
+            // Default velocity of 1.0 represents neutral baseline (no hoarding, no excessive circulation)
+            // In a full implementation, this would come from the velocity analyzer
+            let velocity = 1.0;
             ParticipantState {
                 participant_id: p.participant_id.clone(),
                 stake_sats: p.stake_sats,
@@ -259,7 +261,14 @@ pub async fn apply_labor(
     }))
 }
 
-/// Calculate trust coefficient based on duration
+/// Calculate trust coefficient based on duration (follows BDLD economic model)
+/// 
+/// Trust coefficient brackets:
+/// - < 30 days: 0.5x (minimal commitment)
+/// - 30-90 days: 1.0x (baseline)
+/// - 90-180 days: 1.3x (medium commitment)
+/// - 180-365 days: 1.6x (strong commitment)
+/// - 365+ days: 2.0x (maximum trust)
 fn calculate_trust_coefficient(duration_days: u32) -> f64 {
     match duration_days {
         0..=29 => 0.5,
@@ -293,6 +302,11 @@ pub async fn get_labor_value(
     })
 }
 
+// Placeholder variance values for volatility model
+// TODO: Replace with actual historical data and real-time velocity measurements
+const PLACEHOLDER_VELOCITY_VARIANCE: f64 = 0.05;
+const PLACEHOLDER_HISTORICAL_VARIANCE: f64 = 0.1;
+
 /// Get volatility model (deterministic)
 pub async fn get_volatility(
     State(node): State<GlobalNode>,
@@ -303,8 +317,8 @@ pub async fn get_volatility(
     let trust_coefficients: Vec<f64> = participants.iter().map(|p| p.trust_coefficient).collect();
     
     let trust_variance = calculate_variance(&trust_coefficients);
-    let velocity_variance = 0.05; // Placeholder - would come from actual velocity data
-    let historical_variance = 0.1; // Placeholder - would come from historical data
+    let velocity_variance = PLACEHOLDER_VELOCITY_VARIANCE; // Would come from actual velocity data
+    let historical_variance = PLACEHOLDER_HISTORICAL_VARIANCE; // Would come from historical data
     
     // Volatility index combines these variances
     let volatility_index = (trust_variance + velocity_variance + historical_variance) / 3.0;
