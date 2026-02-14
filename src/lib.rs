@@ -10,4 +10,7 @@ pub mod velocity_config;
 #[cfg(feature = "rpc")]
 pub mod bitcoin_core_chain;
 
+#[cfg(feature = "api")]
+pub mod api;
+
 pub mod prelude;
