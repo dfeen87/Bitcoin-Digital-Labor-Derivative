@@ -18,6 +18,11 @@ name = "api-server"
 path = "src/bin/api_server.rs"
 required-features = ["api"]
 
+[[example]]
+name = "global_node_usage"
+path = "examples/global_node_usage.rs"
+required-features = ["api"]
+
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
