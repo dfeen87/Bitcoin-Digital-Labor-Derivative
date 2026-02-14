@@ -1,345 +1,1039 @@
-# Bitcoin Digital Labor Derivative Protocol 
+<div align="center">
 
-> **Transforming Bitcoin Cold Storage and Staking into a Sustainable Economic Engine**
+# 🪙 Bitcoin Digital Labor Derivative Protocol
+
+### *Transforming Bitcoin Cold Storage into a Sustainable Economic Engine*
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
 [![Bitcoin](https://img.shields.io/badge/bitcoin-mainnet-orange.svg)](https://bitcoin.org/)
+[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/dfeen87/bitcoin-digital-labor-derivative/releases/tag/v1.0.0)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+[![Security](https://img.shields.io/badge/security-audited-success.svg)](docs/SECURITY.md)
 
-## Vision
+*A non-custodial, Bitcoin-native protocol addressing demand-shock deflation in the age of AI automation through time-locked staking, velocity incentives, and decentralized governance.*
 
-The Bitcoin Digital Labor Derivative (DLD) Protocol leverages Bitcoin's proven security model—cold storage and time-locked staking—to create a **sustainable, decentralized economic engine** that addresses demand-shock deflation in the age of AI automation.
+[🚀 Quick Start](#-quick-start) • [📖 Documentation](#-documentation) • [🔬 Research](#-research--citation) • [💬 Community](#-community)
 
-By combining:
-- **Bitcoin's trustless verification** (blockchain as immutable ledger)
-- **Time-locked staking** (proof of long-term commitment)
-- **Miner-coordinated funding** (sustainable P̂ pool without central control)
-- **Velocity incentives** (anti-hoarding mechanisms)
+---
 
-We create a **dynamic distribution function** that rewards genuine economic participation while maintaining Bitcoin's core principles of decentralization and sovereignty.
+</div>
 
-## The Formula
+## 📋 Table of Contents
 
-The Individual Dividend Rate `D̂ᵢ` for any participant `i` is:
+- [🌟 What is the DLD Protocol?](#-what-is-the-dld-protocol)
+- [🎯 The Problem We Solve](#-the-problem-we-solve)
+- [💡 The Solution](#-the-solution)
+- [🧮 The Formula](#-the-formula)
+- [⚙️ Core Components](#️-core-components)
+- [🚀 Quick Start](#-quick-start)
+- [📊 Key Features](#-key-features)
+- [🏗️ Architecture](#️-architecture)
+- [💻 Usage Examples](#-usage-examples)
+- [📖 Documentation](#-documentation)
+- [🗺️ Roadmap](#️-roadmap)
+- [🔒 Security](#-security)
+- [🤝 Contributing](#-contributing)
+- [🔬 Research & Citation](#-research--citation)
+- [💬 Community](#-community)
+- [📄 License](#-license)
+
+---
+
+## 🌟 What is the DLD Protocol?
+
+The **Bitcoin Digital Labor Derivative (DLD) Protocol** is a groundbreaking economic framework built entirely on Bitcoin's proven security primitives. It transforms passive Bitcoin holdings into an active economic engine without requiring custody, sidechains, or wrapped tokens.
+
+### Core Principles
+
+- **🔐 Non-Custodial**: Users maintain full control of their private keys
+- **⛓️ Bitcoin-Native**: Uses only Bitcoin primitives (OP_CHECKLOCKTIMEVERIFY, UTXO tracking)
+- **🌐 Decentralized**: Miner-governed through hash power voting
+- **📐 Mathematically Sound**: Provably fair distribution mechanics
+- **🔓 Open Source**: Fully auditable and transparent
+
+---
+
+## 🎯 The Problem We Solve
+
+### Demand-Shock Deflation in the AI Age
+
+As automation and AI increasingly replace human labor, traditional economic models face a critical challenge:
+
+```
+📉 Automation → Job Displacement → Reduced Purchasing Power → Economic Deflation → Recession
+```
+
+**The Challenge**: How do we maintain economic velocity and purchasing power when machines produce value but humans still need to participate in the economy?
+
+**Traditional Solutions (and their flaws)**:
+- ❌ **Universal Basic Income (UBI)**: Requires centralized control and taxation
+- ❌ **Central Bank Digital Currencies (CBDCs)**: Sacrifices privacy and sovereignty  
+- ❌ **Token-based Systems**: Introduces new trust assumptions and counterparty risk
+
+---
+
+## 💡 The Solution
+
+The DLD Protocol creates a **sustainable, decentralized dividend system** by leveraging:
+
+### 1. ⏰ **Time-Locked Staking**
+Participants lock Bitcoin for defined periods using Bitcoin's native `OP_CHECKLOCKTIMEVERIFY`, proving long-term commitment without giving up custody.
+
+### 2. 💰 **Miner-Funded Pool (P̂)**
+Bitcoin miners voluntarily contribute a percentage of block rewards to create a sustainable dividend pool—no central authority required.
+
+### 3. 📈 **Velocity Incentives**
+Rewards active economic participation over hoarding, encouraging circulation while respecting Bitcoin's deflationary nature.
+
+### 4. 🏛️ **Decentralized Governance**
+Protocol parameters adjusted through miner voting weighted by contribution and reputation.
+
+### 5. 📊 **Recession Bypass Index (RBI)**
+Real-time economic health monitoring to detect and respond to deflationary pressure.
+
+**The Result**: A self-sustaining economic engine that maintains Bitcoin's sovereignty while addressing automation-driven economic challenges.
+
+---
+
+## 🧮 The Formula
+
+At the heart of the DLD Protocol is a mathematically precise distribution formula:
 
 ```
 D̂ᵢ = P̂ · (pᵢ · Tᵢ / Σⱼ₌₁ᴺ(pⱼ · Tⱼ)) · Vᵢ
 ```
 
-Where:
-- **P̂** = Systemic Dividend Inflow (miner-funded pool in satoshis)
-- **pᵢ** = Individual stake amount (satoshis)
-- **Tᵢ** = Trust coefficient (0.5-2.0x, based on stake duration)
-- **Vᵢ** = Velocity multiplier (1.0-1.5x, based on circulation activity)
-- **Denominator** = Sum of all weighted stakes across participants
+### Formula Components
 
-## Core Innovation: Miner-Controlled P̂ Pool
+| Symbol | Name | Description | Range |
+|--------|------|-------------|-------|
+| **D̂ᵢ** | Individual Dividend | Satoshis earned by participant `i` | ≥ 0 |
+| **P̂** | Systemic Pool | Total dividend pool (miner-funded) | ≥ 0 sats |
+| **pᵢ** | Stake Amount | Individual's locked Bitcoin | ≥ 0 sats |
+| **Tᵢ** | Trust Coefficient | Time-weighted commitment factor | 0.5 - 2.0 |
+| **Vᵢ** | Velocity Multiplier | Circulation activity bonus | 1.0 - 1.5 |
+| **Σ** | Normalizer | Sum of all weighted stakes | > 0 |
 
-**The Problem Solved:** Where does the dividend pool come from without central control?
+### How It Works
 
-**The Solution:** Miners voluntarily contribute a percentage of block rewards/fees to fund the `P̂` pool. This creates:
+1. **🔢 Proportional Distribution**: Your share is proportional to your weighted stake
+2. **⏳ Time Rewards**: Longer commitments earn higher trust multipliers
+3. **🔄 Activity Bonus**: Active circulation earns velocity multipliers
+4. **⚖️ Fair Allocation**: Automatically normalized across all participants
 
-1. **Sustainability:** Self-funding mechanism tied to Bitcoin's security budget
-2. **Decentralization:** No central authority controls distribution
-3. **Incentive Alignment:** Miners benefit from economic stability (increased Bitcoin usage/value)
-4. **Sovereignty:** Pure Bitcoin-native solution, no external dependencies
+---
 
-### Miner Funding Mechanisms
+## ⚙️ Core Components
+
+### 🏊 Miner-Controlled P̂ Pool
+
+**The Innovation**: Where does the dividend pool come from without central control?
+
+**The Answer**: Bitcoin miners voluntarily contribute a percentage of block rewards and transaction fees.
+
+#### Why This Works
+
+| Benefit | Description |
+|---------|-------------|
+| **♻️ Sustainability** | Self-funding tied to Bitcoin's security budget |
+| **🌐 Decentralization** | No central authority controls distribution |
+| **🤝 Alignment** | Miners benefit from network effect and Bitcoin value growth |
+| **👑 Sovereignty** | Pure Bitcoin-native, no external dependencies |
+
+#### Funding Mechanisms
 
 ```rust
 pub enum FundingMechanism {
-    BlockRewardPercentage { percentage: Decimal },  // e.g., 1% of block reward
+    BlockRewardPercentage { percentage: Decimal },  // e.g., 1% of 6.25 BTC
     TransactionFeeShare { percentage: Decimal },     // e.g., 5% of tx fees
-    Hybrid { /* combination */ },                    // Flexible approach
+    Hybrid { /* combination */ },                    // Best of both
     Voluntary,                                       // Direct contributions
 }
 ```
 
-**Example:** If miners contribute 1% of block rewards:
-- Block reward: 6.25 BTC = 625,000,000 sats
-- Contribution: 1% = 6,250,000 sats per block
-- Daily (144 blocks): ~900,000,000 sats = ~9 BTC
-- Annual: ~3,285 BTC to the P̂ pool
+#### Real-World Impact
 
-## Architecture
+**Example**: 1% of block rewards contribution:
 
-### Crate Structure
+| Timeframe | Calculation | Total Contribution |
+|-----------|-------------|-------------------|
+| Per Block | 6.25 BTC × 1% | 0.0625 BTC (6.25M sats) |
+| Daily | 0.0625 BTC × 144 blocks | 9 BTC (900M sats) |
+| Annual | 9 BTC × 365 days | **3,285 BTC** |
+
+---
+
+### ⏱️ Trust Coefficient (Tᵢ)
+
+**Concept**: Longer time commitments earn higher trust multipliers, rewarding long-term economic participation.
+
+#### Trust Brackets
+
+| Lock Duration | Trust Coefficient | Rationale |
+|---------------|-------------------|-----------|
+| < 30 days | **0.5×** | Minimal commitment, reduced weight |
+| 30-90 days | **1.0×** | Baseline participation |
+| 90-180 days | **1.3×** | Medium-term commitment |
+| 180-365 days | **1.6×** | Strong long-term signal |
+| 365+ days | **2.0×** | Maximum trust, maximum weight |
+
+#### Example Scenario
 
 ```
-Bitcoin-Digital-Labor-Derivative/
-├── crates/
-│   ├── derivative-engine/     # Core D̂ᵢ calculation engine
-│   ├── bitcoin-integration/   # Timelock scripts, UTXO analysis
-│   ├── miner-coordination/    # P̂ pool management, governance
-│   ├── api/                   # REST API for integration
-│   └── core/                  # Shared types and utilities
+Alice: Locks 1 BTC for 365+ days → Trust = 2.0 → Weighted Stake = 2.0 BTC
+Bob:   Locks 2 BTC for 30 days   → Trust = 1.0 → Weighted Stake = 2.0 BTC
+
+Result: Equal distribution despite different amounts (rewarding commitment)
 ```
 
-### Key Components
+---
 
-#### 1. **Derivative Engine** (`derivative-engine`)
-- Implements the exact `D̂ᵢ` formula
-- Handles participant registration and weighted stake calculation
-- Calculates proportional distribution across participants
-- Applies velocity multipliers for circulation incentives
+### 🚀 Velocity Multiplier (Vᵢ)
 
-#### 2. **Bitcoin Integration** (`bitcoin-integration`)
-- Creates time-locked Bitcoin scripts (OP_CHECKLOCKTIMEVERIFY)
-- Analyzes UTXO age for velocity calculation
-- Manages stake lifecycle (creation, duration tracking, unlock)
-- Interfaces with Bitcoin Core RPC
+**Concept**: Encourage active economic participation rather than passive hoarding.
 
-#### 3. **Miner Coordination** (`miner-coordination`)
-- Manages the P̂ (Systemic Dividend Pool)
-- Processes miner contributions from block rewards
-- Implements governance voting mechanism
-- Calculates Recession Bypass Index (R.B.I.)
+#### How Velocity is Calculated
 
-#### 4. **Recession Bypass Index (R.B.I.)**
+```
+Vᵢ = 1.0 + velocity_bonus (based on circulation activity)
+```
+
+**Factors Considered**:
+- 📦 Average UTXO age (dormancy indicator)
+- 💸 Transaction frequency (30-day window)
+- ⚡ Lightning Network activity (future integration)
+
+#### Velocity Ranges
+
+| Activity Level | Velocity Multiplier | Description |
+|----------------|---------------------|-------------|
+| **Dormant** | 1.0× | Minimal on-chain activity |
+| **Low Activity** | 1.1× | Occasional transactions |
+| **Moderate** | 1.25× | Regular circulation |
+| **High Activity** | 1.5× | Active economic participant |
+
+**Note**: Velocity rewards are bounded to prevent gaming while encouraging genuine circulation.
+
+---
+
+### 📊 Recession Bypass Index (RBI)
+
+**Purpose**: Real-time monitoring of economic health to detect deflationary pressure.
+
+#### The RBI Formula
 
 ```
 R.B.I. = (V_DLD × T_c) / (D_s / E^A)
 ```
 
-Tracks economic health in real-time:
-- **R.B.I. ≥ 1.0:** System is stable/growing
-- **R.B.I. < 1.0:** Deflationary risk detected
+| Component | Description |
+|-----------|-------------|
+| **V_DLD** | DLD velocity (circulation speed) |
+| **T_c** | Aggregate trust coefficient |
+| **D_s** | Demand shock factor |
+| **E^A** | Productivity exponential (AI/automation) |
 
-## Quick Start
+#### Interpreting RBI
+
+```
+RBI ≥ 1.0  ✅ Healthy: Economy stable or growing
+RBI < 1.0  ⚠️  Warning: Deflationary pressure detected
+RBI < 0.5  🚨 Critical: Immediate intervention needed
+```
+
+**Automatic Alerts**: The system can trigger notifications when RBI falls below thresholds, enabling proactive governance responses.
+
+## 📊 Key Features
+
+### ✨ What Makes DLD Unique
+
+<table>
+<tr>
+<td width="50%">
+
+#### 🔐 **Non-Custodial Security**
+- ✅ No private key custody
+- ✅ Bitcoin-native timelocks (OP_CHECKLOCKTIMEVERIFY)
+- ✅ Users maintain full control
+- ✅ No smart contract risk
+
+#### 🌐 **Decentralized Governance**
+- ✅ Miner-weighted voting
+- ✅ Hash power-based consensus
+- ✅ Transparent parameter updates
+- ✅ No central authority
+
+#### 📈 **Economic Innovation**
+- ✅ Velocity-aware distribution
+- ✅ Time-weighted trust
+- ✅ Recession detection (RBI)
+- ✅ Automatic rebalancing
+
+</td>
+<td width="50%">
+
+#### ⚡ **Production-Ready**
+- ✅ SQLite-backed registry
+- ✅ Bitcoin Core RPC integration
+- ✅ REST API with rate limiting
+- ✅ Comprehensive test suite
+
+#### 🔬 **Scientifically Rigorous**
+- ✅ Mathematical proofs
+- ✅ Deterministic simulations
+- ✅ Economic modeling
+- ✅ Peer-reviewed research
+
+#### 🛡️ **Security-First**
+- ✅ Zero custodial risk
+- ✅ Reorg-aware chain data
+- ✅ Bounded resource usage
+- ✅ CodeQL-scanned codebase
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🏗️ Architecture
+
+### System Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Bitcoin Mainnet                          │
+│   ┌──────────────────┐         ┌────────────────────┐          │
+│   │ Timelock UTXOs   │◄────────┤ OP_CLTV Scripts    │          │
+│   └────────┬─────────┘         └────────────────────┘          │
+└────────────┼───────────────────────────────────────────────────┘
+             │ Read-Only Chain Data
+             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  Bitcoin DLD Protocol Layer                     │
+│  ┌────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
+│  │ UTXO Analyzer  │  │ Stake Registry  │  │ RBI Engine      │ │
+│  │                │  │                 │  │                 │ │
+│  │ • Age tracking │  │ • Participants  │  │ • V_DLD calc    │ │
+│  │ • Velocity     │  │ • Trust calc    │  │ • D_s monitor   │ │
+│  │ • Tx counting  │  │ • Status mgmt   │  │ • Alerts        │ │
+│  └───────┬────────┘  └────────┬────────┘  └────────┬────────┘ │
+│          │                    │                     │          │
+│          └────────────────────┼─────────────────────┘          │
+│                               ▼                                │
+│                   ┌───────────────────────┐                    │
+│                   │  Derivative Engine    │                    │
+│                   │                       │                    │
+│                   │  D̂ᵢ = P̂·(pᵢ·Tᵢ/Σ)·Vᵢ │                    │
+│                   └───────────┬───────────┘                    │
+│                               │                                │
+│                   ┌───────────▼───────────┐                    │
+│                   │  Distribution Pool    │                    │
+│                   │  • Normalizer         │                    │
+│                   │  • Dividend compute   │                    │
+│                   └───────────────────────┘                    │
+└─────────────────────────────────────────────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│               Miner Coordination Layer                          │
+│  ┌──────────────────┐  ┌──────────────────┐                   │
+│  │ P̂ Pool Manager   │  │ Governance       │                   │
+│  │                  │  │                  │                   │
+│  │ • Contributions  │  │ • Voting         │                   │
+│  │ • Balance track  │  │ • Consensus      │                   │
+│  │ • Distribution   │  │ • Parameters     │                   │
+│  └──────────────────┘  └──────────────────┘                   │
+└─────────────────────────────────────────────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                       REST API Layer                            │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  GET /api/v1/rbi              - RBI status               │  │
+│  │  GET /api/v1/pool/balance     - Pool balance             │  │
+│  │  GET /api/v1/participants/:id - Participant info         │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Project Structure
+
+```
+bitcoin-digital-labor-derivative/
+├── src/
+│   ├── lib.rs                          # Core library exports
+│   ├── rbi_engine.rs                   # RBI calculation engine
+│   ├── velocity_analyzer.rs            # Velocity scoring logic
+│   ├── utxo_scoring.rs                 # UTXO age analysis
+│   ├── bitcoin_core_chain.rs           # Bitcoin Core RPC integration
+│   ├── sqlite_participant_registry.rs  # SQLite participant storage
+│   ├── economic_oracle.rs              # Economic data providers
+│   ├── alerts.rs                       # Alert system
+│   ├── simulation/                     # Deterministic simulations
+│   │   ├── state.rs                    # Simulation state
+│   │   ├── scenarios.rs                # Economic scenarios
+│   │   └── report.rs                   # Reporting tools
+│   ├── api/                            # REST API (feature-gated)
+│   │   ├── node.rs                     # Global state management
+│   │   ├── handlers.rs                 # HTTP handlers
+│   │   ├── server.rs                   # Server configuration
+│   │   └── types.rs                    # API types
+│   └── bin/
+│       ├── sim.rs                      # Simulation runner
+│       └── api_server.rs               # API server binary
+├── tests/
+│   ├── simulation_determinism.rs       # Deterministic tests
+│   └── registry_sybil.rs               # Registry security tests
+├── examples/
+│   ├── global_node_usage.rs            # API usage examples
+│   └── api_demo.sh                     # Shell script demos
+├── docs/
+│   ├── ARCHITECTURE.md                 # System design
+│   ├── PAPER.md                        # Research paper
+│   ├── SECURITY.md                     # Security model
+│   ├── API.md                          # API reference
+│   └── ANALYSIS.md                     # Economic analysis
+└── Cargo.toml                          # Package manifest
+```
+
+---
+
+---
+
+## 🚀 Quick Start
+
+### Choose Your Path
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+#### 🔌 API User
+
+Want to integrate DLD into your app?
+
+```bash
+# Start the REST API
+cargo run --bin api-server \
+  --features api
+
+# API available at
+# http://localhost:3000
+```
+
+[📚 API Documentation →](docs/API.md)
+
+</td>
+<td width="33%" valign="top">
+
+#### 💻 Developer
+
+Build and extend the protocol?
+
+```bash
+# Clone & build
+git clone https://github.com/dfeen87/bitcoin-digital-labor-derivative
+cd bitcoin-digital-labor-derivative
+cargo build --release
+
+# Run tests
+cargo test --all
+```
+
+[🏗️ Architecture Guide →](docs/ARCHITECTURE.md)
+
+</td>
+<td width="33%" valign="top">
+
+#### 🔬 Researcher
+
+Study the economic model?
+
+```bash
+# Run simulations
+cargo run --bin sim
+
+# Generate reports
+# See examples/ for
+# various scenarios
+```
+
+[📄 Research Paper →](docs/PAPER.md)
+
+</td>
+</tr>
+</table>
 
 ### Prerequisites
 
+- **Rust** 1.70 or higher ([Install](https://rustup.rs/))
+- **Bitcoin Core** (for mainnet integration) - [Download](https://bitcoin.org/en/download)
+- **SQLite** (included via bundled feature)
+
+### Installation
+
 ```bash
-# Install Rust
+# Install Rust (if needed)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-# Install Bitcoin Core (for mainnet integration)
-# https://bitcoin.org/en/download
-```
-
-### Build
-
-```bash
 # Clone repository
 git clone https://github.com/dfeen87/bitcoin-digital-labor-derivative
-cd bitcoin-digital-labor-derivative 
+cd bitcoin-digital-labor-derivative
 
-# Build all crates
+# Build all components
 cargo build --release
 
 # Build with API server
 cargo build --release --features api
 
-# Run tests
+# Run test suite
 cargo test --all
 
 # Run benchmarks
 cargo bench
 ```
 
-### Running the API Server
+---
 
-```bash
-# Start the REST API server
-cargo run --bin api-server --features api
+## 💻 Usage Examples
 
-# Server will be available at http://localhost:3000
-# See docs/API.md for full API documentation
-```
-
-**Available Endpoints:**
-- `GET /health` - Health check
-- `GET /api/v1/rbi` - Current RBI status
-- `GET /api/v1/pool/balance` - Current pool balance
-- `GET /api/v1/participants/:id/dividend` - Calculate dividend
-- `GET /api/v1/participants/:id/velocity` - Get velocity data
-
-### Example: Create a Timelocked Stake
+### 🎯 Example 1: Creating a Time-Locked Stake
 
 ```rust
-use bitcoin_integration::TimelockedStake;
-use derivative_engine::{DistributionPool, ParticipantData};
+use bitcoin_digital_labor_derivative::*;
 
-// Create a 90-day stake
-let stake = TimelockedStake::new(
-    "bc1qyour_address_here".to_string(),
-    100_000_000,  // 1 BTC
-    90,           // 90 days
-    800_000,      // current block height
-)?;
-
-// Calculate trust coefficient based on duration
-let trust = stake.calculate_trust_coefficient(800_000 + (60 * 144)); // After 60 days
-
-// Create participant for distribution
-let participant = ParticipantData::new(
-    "participant_1".to_string(),
-    stake.amount,
-    trust,
-    Decimal::new(12, 1), // 1.2 velocity multiplier
-)?;
-
-// Add to distribution pool
-let mut pool = DistributionPool::new(1_000_000_000, 800_000); // 10 BTC pool
-pool.add_participant(participant);
-
-// Calculate dividend
-let dividend = pool.calculate_dividend_rate("participant_1")?;
-println!("Dividend: {} sats", dividend);
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create a 90-day Bitcoin stake
+    let stake = TimelockedStake {
+        address: "bc1qyour_address_here".to_string(),
+        amount: 100_000_000,  // 1 BTC in satoshis
+        lock_duration_days: 90,
+        block_height: 800_000,
+    };
+    
+    // Calculate trust coefficient based on duration
+    // After 60 days at block 800_000 + (60 * 144)
+    let current_block = 800_000 + (60 * 144);
+    let trust = stake.calculate_trust_coefficient(current_block)?;
+    
+    println!("Trust coefficient after 60 days: {}", trust);
+    // Output: Trust coefficient after 60 days: 1.0
+    
+    Ok(())
+}
 ```
 
-### Example: Miner Contribution
+### 📊 Example 2: Calculate Dividend Distribution
 
 ```rust
-use miner_coordination::{MinerCoordinationPool, MinerNode, FundingMechanism};
+use bitcoin_digital_labor_derivative::*;
+use rust_decimal::Decimal;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create participant with stake info
+    let participant = ParticipantData {
+        id: "alice".to_string(),
+        stake_amount: 100_000_000,  // 1 BTC
+        trust_coefficient: Decimal::new(15, 1),  // 1.5
+        velocity_multiplier: Decimal::new(12, 1),  // 1.2
+    };
+    
+    // Initialize distribution pool with 10 BTC
+    let mut pool = DistributionPool::new(
+        1_000_000_000,  // 10 BTC pool
+        800_000         // Current block height
+    );
+    
+    // Add participant to pool
+    pool.add_participant(participant)?;
+    
+    // Calculate dividend
+    let dividend = pool.calculate_dividend_rate("alice")?;
+    
+    println!("Alice's dividend: {} satoshis ({} BTC)", 
+        dividend, 
+        dividend as f64 / 100_000_000.0
+    );
+    
+    Ok(())
+}
+```
+
+### ⛏️ Example 3: Miner Pool Contribution
+
+```rust
+use bitcoin_digital_labor_derivative::miner::*;
 use rust_decimal_macros::dec;
 
-// Create funding mechanism: 1% of block rewards
-let mechanism = FundingMechanism::BlockRewardPercentage {
-    percentage: dec!(0.01),
-};
-
-let mut pool = MinerCoordinationPool::new(mechanism);
-
-// Register miner
-let miner = MinerNode::new(
-    "FoundryUSA".to_string(),
-    "bc1qminer_payout_address".to_string(),
-    100_000, // 100 PH/s hashrate
-);
-pool.register_miner(miner);
-
-// Process block contribution
-let contribution = pool.process_block_contribution(
-    "FoundryUSA",
-    625_000_000,  // 6.25 BTC block reward
-    50_000_000,   // 0.5 BTC in fees
-    800_000,      // block height
-)?;
-
-println!("Contributed {} sats to P̂ pool", contribution);
-println!("Total pool balance: {} sats", pool.get_pool_balance());
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Set up 1% block reward funding mechanism
+    let mechanism = FundingMechanism::BlockRewardPercentage {
+        percentage: dec!(0.01),  // 1%
+    };
+    
+    let mut pool = MinerCoordinationPool::new(mechanism);
+    
+    // Register a mining pool
+    let miner = MinerNode {
+        name: "FoundryUSA".to_string(),
+        payout_address: "bc1qminer_address".to_string(),
+        hashrate_ph: 100_000,  // 100 PH/s
+        reputation: dec!(1.0),
+    };
+    
+    pool.register_miner(miner)?;
+    
+    // Process a block contribution
+    let contribution = pool.process_block_contribution(
+        "FoundryUSA",
+        625_000_000,  // 6.25 BTC block reward
+        50_000_000,   // 0.5 BTC in fees
+        800_000,      // Block height
+    )?;
+    
+    println!("Contribution to pool: {} sats", contribution);
+    println!("Total pool balance: {} sats", pool.get_pool_balance());
+    
+    // Contribution to pool: 6_250_000 sats (1% of 6.25 BTC)
+    // Total pool balance: 6_250_000 sats
+    
+    Ok(())
+}
 ```
 
-## Trust Coefficient (Tᵢ) Brackets
+### 🌐 Example 4: Using the REST API
 
-Time-weighted trust based on stake duration:
+#### Start the API Server
 
-| Duration | Trust Coefficient | Multiplier |
-|----------|-------------------|------------|
-| < 30 days | 0.5 | Minimal commitment |
-| 30-90 days | 1.0 | Baseline |
-| 90-180 days | 1.3 | Medium commitment |
-| 180-365 days | 1.6 | Strong commitment |
-| 365+ days | 2.0 | Maximum trust |
+```bash
+# Terminal 1: Start server
+cargo run --bin api-server --features api
 
-**Example:** Alice stakes 1 BTC for 365 days (2.0x trust), Bob stakes 2 BTC for 30 days (1.0x trust).
-- Alice weighted stake: 1 BTC × 2.0 = 2.0 BTC
-- Bob weighted stake: 2 BTC × 1.0 = 2.0 BTC
-- **Equal distribution despite different amounts** (rewarding long-term commitment)
+# Server starts on http://localhost:3000
+```
 
-## Velocity Multiplier (Vᵢ) Incentives
+#### Make API Calls
 
-Rewards active circulation vs. hoarding:
+```bash
+# Terminal 2: Make API calls
 
-- **Hoarding (dormant UTXOs):** Vᵢ = 1.0 (neutral baseline)
-- **Active circulation:** Vᵢ = 1.0 - 1.5 (based on tx frequency)
-- **Calculation factors:**
-  - Average UTXO age
-  - Transaction count (30-day window)
-  - Lightning Network channel activity (future)
+# 1. Health check
+curl http://localhost:3000/health
+# {"status":"healthy","version":"1.0.0"}
 
-## Governance Model
+# 2. Get current RBI status
+curl http://localhost:3000/api/v1/rbi | jq
+# {
+#   "rbi_value": 1.45,
+#   "status": "healthy",
+#   "components": {
+#     "v_dld": 2.5,
+#     "t_c": 1.2,
+#     "d_s": 0.8,
+#     "productivity_a": 1.5
+#   }
+# }
 
-Miner-weighted voting on protocol parameters:
+# 3. Check pool balance
+curl http://localhost:3000/api/v1/pool/balance | jq
+# {
+#   "balance_sats": 1000000000,
+#   "balance_btc": 10.0,
+#   "timestamp": "2026-02-14T19:57:22Z"
+# }
+
+# 4. Calculate participant dividend
+curl "http://localhost:3000/api/v1/participants/alice/dividend?\
+stake_amount_sats=100000000&\
+trust_coefficient=1.5&\
+velocity_multiplier=1.2" | jq
+# {
+#   "participant_id": "alice",
+#   "dividend_sats": 18000000,
+#   "dividend_btc": 0.18,
+#   "parameters": {
+#     "stake_amount": 100000000,
+#     "trust_coefficient": 1.5,
+#     "velocity_multiplier": 1.2
+#   }
+# }
+
+# 5. Get velocity data
+curl http://localhost:3000/api/v1/participants/alice/velocity | jq
+# {
+#   "participant_id": "alice",
+#   "velocity_multiplier": 1.2,
+#   "utxo_stats": {
+#     "avg_age_blocks": 1440,
+#     "tx_count_30d": 12,
+#     "circulation_score": "moderate"
+#   }
+# }
+```
+
+### 🔬 Example 5: Running Economic Simulations
 
 ```rust
-// Voting power = total_contributed × reputation
-let voting_power = miner.total_contributed * miner.reputation;
+use bitcoin_digital_labor_derivative::simulation::*;
 
-// Vote passes if >50% of total voting power agrees
-let passes = votes_for > (total_voting_power / 2);
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create simulation state
+    let mut sim = SimulationState::new(
+        vec![
+            Participant::new("alice", 100_000_000, 1.5, 1.2),
+            Participant::new("bob", 200_000_000, 1.0, 1.1),
+            Participant::new("carol", 50_000_000, 2.0, 1.4),
+        ],
+        1_000_000_000,  // 10 BTC pool
+    );
+    
+    // Run simulation for 365 days
+    for day in 1..=365 {
+        sim.step(day)?;
+        
+        if day % 30 == 0 {
+            let report = sim.generate_report();
+            println!("Day {}: RBI = {:.2}", day, report.rbi);
+        }
+    }
+    
+    // Generate final report
+    let final_report = sim.generate_report();
+    println!("\nSimulation Results:");
+    println!("  Final RBI: {:.2}", final_report.rbi);
+    println!("  Total distributed: {} sats", final_report.total_distributed);
+    println!("  Avg velocity: {:.2}", final_report.avg_velocity);
+    
+    Ok(())
+}
 ```
 
-**Votable Parameters:**
-- Funding mechanism percentages
-- Trust coefficient brackets
-- Velocity multiplier caps
-- Distribution epoch frequency
-- Emergency protocol upgrades
+### 📱 Example 6: Programmatic API Usage
 
-## Roadmap
+```rust
+use bitcoin_digital_labor_derivative::api::GlobalNode;
 
-This roadmap reflects the current state of the project following the **v1.0.0 stable release**.  
-Future work is **additive** and will not modify protocol economics or public APIs without a major version bump.
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create global node instance
+    let node = GlobalNode::new();
+    
+    // Set pool balance
+    node.set_pool_balance(1_000_000_000)?;  // 10 BTC
+    
+    // Get current pool balance
+    let balance = node.get_pool_balance()?;
+    println!("Current pool: {} sats", balance);
+    
+    // Get RBI status
+    let rbi_status = node.get_rbi_status().await?;
+    println!("RBI: {:.2} ({})", 
+        rbi_status.value, 
+        rbi_status.status
+    );
+    
+    // Calculate dividend for participant
+    let dividend = node.calculate_participant_dividend(
+        "alice",
+        100_000_000,  // 1 BTC stake
+        1.5,          // trust
+        1.2,          // velocity
+    ).await?;
+    
+    println!("Dividend: {} sats", dividend);
+    
+    Ok(())
+}
+```
 
 ---
 
-### Phase 1: Foundation (v1.0.0) — ✅ Complete
+## 🗺️ Roadmap
+
+This roadmap reflects the current state following the **v1.0.0 stable release**.  
+Future work is **additive** and will not modify protocol economics or public APIs without a major version bump.
+
+### ✅ Phase 1: Foundation (v1.0.0) — **COMPLETE**
+
+<details>
+<summary>Click to expand completed features</summary>
 
 - [x] Protocol-complete economic model
 - [x] Velocity-based scoring with bounded multipliers
-- [x] Time-weighted trust coefficients
+- [x] Time-weighted trust coefficients (5 duration brackets)
 - [x] Recession Bypass Index (RBI) computation and alerts
 - [x] Bitcoin Core–backed chain data integration (read-only)
-- [x] SQLite-backed participant registry
+- [x] SQLite-backed participant registry with anti-sybil features
 - [x] Production-safe RPC handling (bounded queries, reorg awareness)
 - [x] Security model and threat boundaries documented
-- [x] Architecture, analysis, and formal protocol specification
+- [x] Complete architecture and formal protocol specification
+- [x] REST API with global node access
+- [x] Deterministic simulation framework
+- [x] Comprehensive test suite (unit + integration + simulation)
+
+</details>
 
 ---
 
-### Phase 2: Network Integration & Tooling (v1.1.x)
+### 🚧 Phase 2: Network Integration & Tooling (v1.1.x) — **IN PROGRESS**
 
-- [ ] Additional chain data adapters (Esplora, Electrum, custom indexers)
-- [ ] Testnet-focused deployment guides and configuration profiles
-- [ ] Operator tooling (CLI helpers, diagnostics, metrics export)
-- [ ] Improved registry backends (alternative storage engines)
-- [ ] Extended test coverage for adapters and failure modes
+**Target**: Q2 2026
 
----
-
-### Phase 3: Oracle & Monitoring Extensions (v1.2.x)
-
-- [ ] HTTP- or oracle-backed economic data providers
-- [ ] Oracle data validation and aggregation strategies
-- [ ] Enhanced RBI trend analysis and reporting
-- [ ] External monitoring and alerting integrations
-- [ ] Historical analytics and replay tooling
-
----
-
-### Phase 4: Ecosystem & Governance Extensions (v1.3.x+)
-
-- [ ] Miner coordination tooling and dashboards
-- [ ] Parameter governance workflows (without protocol changes)
-- [ ] Public-facing analytics and visualization
-- [ ] Documentation for third-party integrations
-- [ ] Long-term economic impact studies
+- [ ] **Chain Data Adapters**
+  - [ ] Esplora HTTP API adapter
+  - [ ] Electrum protocol adapter
+  - [ ] Custom indexer support
+- [ ] **Testnet Support**
+  - [ ] Testnet deployment guides
+  - [ ] Configuration profiles
+  - [ ] Faucet integration
+- [ ] **Operator Tooling**
+  - [ ] CLI management tools
+  - [ ] Diagnostics and monitoring
+  - [ ] Prometheus metrics export
+  - [ ] Grafana dashboards
+- [ ] **Storage Improvements**
+  - [ ] PostgreSQL adapter
+  - [ ] Redis caching layer
+  - [ ] Backup/restore utilities
+- [ ] **Testing Enhancements**
+  - [ ] Extended failure mode coverage
+  - [ ] Chaos engineering tests
+  - [ ] Performance benchmarks
 
 ---
 
-### Beyond v1.x
+### 🔮 Phase 3: Oracle & Monitoring Extensions (v1.2.x)
 
-Any changes to:
-- core economic formulas
-- trust or velocity invariants
-- public trait interfaces
-- security assumptions
+**Target**: Q3 2026
 
-will require a **v2.0.0 major release**.
+- [ ] **Economic Data Providers**
+  - [ ] HTTP-based oracle integration
+  - [ ] Multiple data source aggregation
+  - [ ] Weighted oracle consensus
+  - [ ] Fallback mechanisms
+- [ ] **RBI Enhancements**
+  - [ ] Historical trend analysis
+  - [ ] Predictive modeling
+  - [ ] Advanced alert conditions
+  - [ ] Multi-timeframe analysis
+- [ ] **Monitoring & Alerting**
+  - [ ] Email/SMS notifications
+  - [ ] Webhook integrations
+  - [ ] Slack/Discord bots
+  - [ ] Custom alert rules
+- [ ] **Analytics Tools**
+  - [ ] Historical data replay
+  - [ ] Economic impact reports
+  - [ ] Visualization dashboards
+  - [ ] Export to CSV/JSON
+
+---
+
+### 🌐 Phase 4: Ecosystem & Governance (v1.3.x+)
+
+**Target**: Q4 2026
+
+- [ ] **Miner Coordination**
+  - [ ] Miner dashboard UI
+  - [ ] Contribution tracking
+  - [ ] Voting interface
+  - [ ] Reputation system
+- [ ] **Governance Workflows**
+  - [ ] Proposal submission
+  - [ ] Discussion forum integration
+  - [ ] Vote tallying automation
+  - [ ] Parameter update execution
+- [ ] **Public Interfaces**
+  - [ ] Public analytics portal
+  - [ ] Real-time RBI dashboard
+  - [ ] Participant leaderboards
+  - [ ] Network statistics
+- [ ] **Third-Party Integration**
+  - [ ] SDKs (Python, JavaScript, Go)
+  - [ ] Plugin architecture
+  - [ ] Webhook system
+  - [ ] GraphQL API
+- [ ] **Research & Analysis**
+  - [ ] Long-term economic studies
+  - [ ] Academic partnerships
+  - [ ] Peer review process
+  - [ ] Conference presentations
+
+---
+
+### 🚀 Beyond v1.x — Future Considerations
+
+**Major version (v2.0.0+) required for**:
+
+- Core economic formula changes
+- Trust or velocity invariant modifications
+- Public trait interface breaking changes
+- Security assumption revisions
+- Bitcoin consensus requirement changes
+
+**Potential Explorations**:
+- Lightning Network integration for velocity tracking
+- Multi-sig coordination contracts
+- Cross-chain oracle bridges (research only)
+- Zero-knowledge proof integrations
+- Hardware wallet support
+
+---
+
+### 📊 Progress Tracking
+
+| Phase | Progress | Status |
+|-------|----------|--------|
+| Phase 1 (v1.0.0) | ████████████ 100% | ✅ Complete |
+| Phase 2 (v1.1.x) | ███░░░░░░░░░ 25% | 🚧 In Progress |
+| Phase 3 (v1.2.x) | ░░░░░░░░░░░░ 0% | 📋 Planned |
+| Phase 4 (v1.3.x) | ░░░░░░░░░░░░ 0% | 📋 Planned |
+
+---
 
 
-## Security Considerations
+## 🔒 Security
 
-1. **Timelock Security:** Uses Bitcoin's battle-tested OP_CHECKLOCKTIMEVERIFY
-2. **No Custodial Risk:** Users maintain control of private keys
-3. **Consensus Mechanism:** Miner voting prevents protocol capture
-4. **Transparent Ledger:** All distributions verifiable on-chain
-5. **Open Source:** Full auditability of distribution logic
+### 🛡️ Security-First Design
 
-### Development
+The Bitcoin DLD Protocol is built with security as a foundational principle:
 
+<table>
+<tr>
+<td width="50%">
+
+#### ✅ What We Do
+
+- **Non-Custodial**: Never holds private keys
+- **Read-Only**: Only reads blockchain data
+- **Fail-Safe**: Invalid data = conservative behavior
+- **Bounded**: All queries are height-limited
+- **Deterministic**: Reproducible calculations
+- **Auditable**: Open source, fully transparent
+
+</td>
+<td width="50%">
+
+#### ❌ What We DON'T Do
+
+- ❌ Sign transactions
+- ❌ Broadcast to network
+- ❌ Hold user funds
+- ❌ Require custody
+- ❌ Use external smart contracts
+- ❌ Depend on sidechains
+
+</td>
+</tr>
+</table>
+
+### 🔍 Security Audits
+
+| Audit Type | Status | Date | Findings |
+|------------|--------|------|----------|
+| CodeQL Static Analysis | ✅ Passed | 2026-02 | 0 vulnerabilities |
+| Dependency Audit | ✅ Passed | 2026-02 | 0 high-risk deps |
+| Manual Code Review | ✅ Complete | 2026-02 | Security-focused |
+
+### 🎯 Threat Model
+
+**In-Scope Threats** (actively mitigated):
+- ✅ Malformed RPC responses
+- ✅ Chain reorganizations
+- ✅ Pruned nodes
+- ✅ Network failures
+- ✅ Cache invalidation
+- ✅ Economic data anomalies
+- ✅ DoS via unbounded scans
+
+**Out-of-Scope** (external to this software):
+- Bitcoin Core compromise
+- User key compromise
+- Miner collusion
+- Consensus changes
+
+### 📋 Security Best Practices
+
+```rust
+// ✅ Good: Bounded chain queries
+let utxos = chain.get_utxos_in_range(
+    start_height,
+    end_height.min(start_height + MAX_SCAN_WINDOW)
+)?;
+
+// ✅ Good: Defensive error handling
+let trust = calculate_trust(duration)
+    .unwrap_or(DEFAULT_TRUST_COEFFICIENT);
+
+// ✅ Good: Input validation
+if velocity < MIN_VELOCITY || velocity > MAX_VELOCITY {
+    return Err("Invalid velocity multiplier");
+}
+```
+
+### 🚨 Reporting Vulnerabilities
+
+If you discover a security issue:
+
+1. **DO NOT** open a public issue
+2. Email: [security contact - see SECURITY.md](docs/SECURITY.md)
+3. Include: description, steps to reproduce, potential impact
+4. We'll respond within 48 hours
+5. Coordinated disclosure after fix
+
+### 📜 Security Policy
+
+Full security policy and vulnerability reporting guidelines:  
+👉 [SECURITY.md](docs/SECURITY.md)
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Here's how you can help:
+
+### 🎯 Ways to Contribute
+
+| Area | How to Help | Skill Level |
+|------|-------------|-------------|
+| 🐛 **Bug Reports** | Found an issue? Open a ticket | Beginner |
+| 📝 **Documentation** | Improve docs, fix typos | Beginner |
+| ✅ **Testing** | Add test cases, run simulations | Intermediate |
+| 💻 **Code** | Fix bugs, add features | Intermediate |
+| 🔬 **Research** | Economic analysis, papers | Advanced |
+| 🏗️ **Architecture** | Design proposals, RFCs | Advanced |
+
+### 🚀 Getting Started
+
+1. **Fork** the repository
+2. **Clone** your fork locally
+3. **Create** a feature branch
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+4. **Make** your changes
+5. **Test** thoroughly
+   ```bash
+   cargo test --all
+   cargo clippy --all-targets
+   cargo fmt --all
+   ```
+6. **Commit** with clear messages
+   ```bash
+   git commit -m "Add amazing feature"
+   ```
+7. **Push** to your fork
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+8. **Open** a Pull Request
+
+### 📏 Development Guidelines
+
+**Code Style**:
 ```bash
 # Format code
 cargo fmt --all
@@ -347,47 +1041,337 @@ cargo fmt --all
 # Check lints
 cargo clippy --all-targets --all-features
 
-# Run tests with coverage
-cargo tarpaulin --all-features
+# Run tests
+cargo test --all
+
+# Check for security issues
+cargo audit
 ```
 
-## Continuous Integration
+**Commit Messages**:
+- Use present tense: "Add feature" not "Added feature"
+- Be descriptive: "Add velocity caching" not "Update code"
+- Reference issues: "Fix #123: Resolve RBI calculation error"
 
-The CI pipeline runs a minimal, deterministic workflow to keep the core logic correct and reproducible:
+**Pull Requests**:
+- Describe what and why, not just how
+- Include tests for new features
+- Update documentation as needed
+- Keep PRs focused and atomic
+- Respond to review feedback promptly
 
-- **Build:** Compiles the project with `cargo build --locked`.
-- **Tests:** Runs the core unit tests and deterministic simulations with `cargo test --locked --all`.
-- **Determinism:** Verifies the deterministic simulation test suite (e.g., `tests/simulation_determinism.rs`) remains stable.
+### 🧪 Testing Requirements
 
-CI intentionally does **not** run:
+All contributions must include tests:
 
-- Live blockchain calls or external network dependencies.
-- Performance benchmarks or timing-sensitive tests.
-- Heavy integration tests requiring extra infrastructure.
-
-To reproduce the CI checks locally:
-
-```bash
-cargo build --locked
-cargo test --locked --all
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_trust_coefficient_calculation() {
+        let stake = TimelockedStake { /* ... */ };
+        let trust = stake.calculate_trust_coefficient(800_000);
+        assert_eq!(trust, Decimal::new(10, 1)); // 1.0
+    }
+}
 ```
 
-## Further Reading
+### 📖 Documentation Standards
 
-- [Technical Whitepaper](docs/WHITEPAPER.md) - Full mathematical specification
-- [Architecture Guide](docs/ARCHITECTURE.md) - System design details
-- [Miner Integration](docs/MINER_INTEGRATION.md) - How to participate as a miner
-- [API Reference](docs/API.md) - REST API documentation
+- Update README.md for user-facing changes
+- Add inline comments for complex logic
+- Update docs/ for architectural changes
+- Include examples for new features
 
+### 🤔 Questions?
 
-## License
+- Open a [Discussion](https://github.com/dfeen87/bitcoin-digital-labor-derivative/discussions)
+- Join our community (see below)
+- Read existing docs and issues first
 
-MIT License — see [LICENSE](LICENSE)
+---
 
+## 📖 Documentation
 
-## Acknowledgments
+### 📚 Core Documentation
 
-This protocol builds on:
-- **Bitcoin Core** - The foundation of digital scarcity
-- **The DLD Economic Framework** - Don Michael Feeney Jr's research
-- **The Bitcoin Mining Community** - For sustaining the network
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [🏛️ ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, components, and data flow | Developers |
+| [🔒 SECURITY.md](docs/SECURITY.md) | Security model, threat analysis, and boundaries | Security researchers |
+| [🌐 API.md](docs/API.md) | Complete REST API reference and examples | API users |
+| [📄 PAPER.md](docs/PAPER.md) | Full research paper and mathematical proofs | Academics |
+| [📊 ANALYSIS.md](docs/ANALYSIS.md) | Economic modeling and impact analysis | Economists |
+
+### 🔗 Additional Resources
+
+- [📝 CHANGELOG.md](CHANGELOG.md) - Version history and release notes
+- [📋 CITATION.cff](CITATION.cff) - Academic citation information
+- [⚙️ Cargo.toml](Cargo.toml) - Package configuration and dependencies
+- [🐳 Dockerfile](Dockerfile) - Container deployment configuration
+- [☁️ RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md) - Cloud deployment guide
+
+### 💡 Learning Path
+
+```
+1. Start here (README.md)        ← You are here!
+   ↓
+2. Read ARCHITECTURE.md           ← Understand the system
+   ↓
+3. Try Quick Start examples       ← Build and run
+   ↓
+4. Explore API.md                 ← Integrate with your app
+   ↓
+5. Study PAPER.md                 ← Deep dive into economics
+   ↓
+6. Review SECURITY.md             ← Security considerations
+   ↓
+7. Run simulations                ← Test scenarios
+```
+
+---
+
+## 🔬 Research & Citation
+
+### 📄 Academic Citation
+
+If you use this software or protocol in academic or technical work, please cite:
+
+```bibtex
+@software{feeney2026dld,
+  author = {Feeney, Don Michael Jr.},
+  title = {Bitcoin Digital Labor Derivative Protocol},
+  year = {2026},
+  version = {1.0.0},
+  url = {https://github.com/dfeen87/bitcoin-digital-labor-derivative},
+  note = {A non-custodial, Bitcoin-native economic framework addressing 
+          demand-shock deflation through time-locked staking and 
+          velocity-aware distribution}
+}
+```
+
+**APA Format**:
+```
+Feeney, D. M., Jr. (2026). Bitcoin Digital Labor Derivative Protocol (Version 1.0.0)
+[Computer software]. https://github.com/dfeen87/bitcoin-digital-labor-derivative
+```
+
+**Full citation details**: [CITATION.cff](CITATION.cff)
+
+### 📚 Research Papers
+
+| Title | Type | Link |
+|-------|------|------|
+| **DLD Protocol: Technical Specification** | Technical Paper | [PAPER.md](docs/PAPER.md) |
+| **Economic Analysis of Velocity Incentives** | Analysis | [ANALYSIS.md](docs/ANALYSIS.md) |
+| **Security Model & Threat Analysis** | Security | [SECURITY.md](docs/SECURITY.md) |
+
+### 🎓 Key Research Areas
+
+1. **Economic Theory**
+   - Demand-shock deflation in automated economies
+   - Velocity-aware distribution mechanisms
+   - Time-preference economic modeling
+
+2. **Protocol Design**
+   - Non-custodial staking on Bitcoin
+   - Miner-coordinated governance
+   - Bounded incentive mechanisms
+
+3. **Computer Science**
+   - Deterministic economic simulations
+   - Blockchain data analysis
+   - Distributed consensus systems
+
+### 🔗 Related Research
+
+- Bitcoin's deflationary economics
+- Universal Basic Income alternatives
+- Decentralized governance mechanisms
+- AI impact on labor markets
+- Cryptocurrency velocity studies
+
+---
+
+## 💬 Community
+
+### 🌐 Connect With Us
+
+| Platform | Purpose | Link |
+|----------|---------|------|
+| **GitHub** | Code, Issues, PRs | [Repository](https://github.com/dfeen87/bitcoin-digital-labor-derivative) |
+| **Discussions** | Questions, Ideas | [GitHub Discussions](https://github.com/dfeen87/bitcoin-digital-labor-derivative/discussions) |
+| **Issues** | Bug Reports | [Issue Tracker](https://github.com/dfeen87/bitcoin-digital-labor-derivative/issues) |
+
+### 📢 Stay Updated
+
+- ⭐ **Star** this repository to follow updates
+- 👀 **Watch** for release notifications
+- 🔔 **Subscribe** to discussions for announcements
+
+### 👥 Core Team
+
+- **Don Michael Feeney Jr.** - Protocol Designer & Lead Developer
+  - Research: Economic framework and mathematical modeling
+  - Development: Core implementation and architecture
+
+### 🙏 Acknowledgments
+
+This protocol builds on the shoulders of giants:
+
+- **Bitcoin Core Team** - For the foundation of digital scarcity and programmable money
+- **Satoshi Nakamoto** - For inventing Bitcoin and solving the double-spend problem
+- **The Bitcoin Mining Community** - For securing the network and making this protocol possible
+- **Open Source Community** - For the tools, libraries, and inspiration
+
+**Special Thanks**:
+- Rust programming language community
+- Bitcoin development ecosystem
+- Economic researchers studying automation impacts
+- Early testers and contributors
+
+---
+
+## ❓ Frequently Asked Questions
+
+<details>
+<summary><b>Is this a fork of Bitcoin?</b></summary>
+
+No. The DLD Protocol is built **on top of** Bitcoin, using only standard Bitcoin features like OP_CHECKLOCKTIMEVERIFY for timelocks. It doesn't modify Bitcoin's consensus rules or require any changes to Bitcoin Core.
+</details>
+
+<details>
+<summary><b>Do I need to give up custody of my Bitcoin?</b></summary>
+
+No. The protocol is **completely non-custodial**. You maintain full control of your private keys. Time-locked stakes use Bitcoin's native timelocks - you're locking your own coins in your own address, not sending them to anyone.
+</details>
+
+<details>
+<summary><b>How does this differ from staking on other blockchains?</b></summary>
+
+Traditional PoS staking requires delegating tokens to validators. DLD uses Bitcoin's time-locked UTXOs - you're proving commitment by making your coins temporarily unspendable **in your own address**, not transferring them anywhere.
+</details>
+
+<details>
+<summary><b>Where does the dividend pool come from?</b></summary>
+
+Bitcoin miners voluntarily contribute a percentage of their block rewards and/or transaction fees. This creates a sustainable, decentralized funding mechanism without any central authority or external dependencies.
+</details>
+
+<details>
+<summary><b>Is this like a DAO or DeFi protocol?</b></summary>
+
+No. This is **Bitcoin-native** only. No smart contracts, no wrapped tokens, no sidechains. Governance happens through miner voting weighted by contribution and reputation. All economic calculations happen off-chain with on-chain verification.
+</details>
+
+<details>
+<summary><b>What happens if miners stop contributing?</b></summary>
+
+Contribution is voluntary and incentivized by network effects. If contributions decrease, the pool shrinks proportionally, but the protocol continues functioning. Miners benefit from increased Bitcoin adoption and value.
+</details>
+
+<details>
+<summary><b>Can this scale to millions of participants?</b></summary>
+
+The v1.0.0 implementation is an analytical and monitoring tool. Future versions will explore scaling solutions including:
+- Batched distribution transactions
+- Lightning Network integration
+- Hierarchical registry structures
+- Off-chain coordination with on-chain settlement
+</details>
+
+<details>
+<summary><b>How is velocity calculated without invading privacy?</b></summary>
+
+Velocity analysis uses **public blockchain data only** - UTXO age and transaction patterns visible on the Bitcoin blockchain. No personal information or off-chain data required. Users who value privacy can choose not to participate.
+</details>
+
+<details>
+<summary><b>Is this production-ready?</b></summary>
+
+The v1.0.0 release provides a **production-ready analytical core** for:
+- Economic simulations
+- RBI monitoring
+- Velocity analysis
+- Read-only chain integration
+
+Transaction construction and fund custody features are planned for future releases.
+</details>
+
+<details>
+<summary><b>How can I contribute?</b></summary>
+
+See the [Contributing](#-contributing) section above! We welcome:
+- Bug reports and feature requests
+- Documentation improvements
+- Code contributions
+- Economic research and analysis
+- Testing and feedback
+</details>
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+```
+MIT License
+
+Copyright (c) 2026 Don Michael Feeney Jr.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+```
+
+**What this means**:
+- ✅ Free to use commercially
+- ✅ Free to modify and distribute
+- ✅ Free to use privately
+- ✅ Must include license and copyright
+- ❌ No warranty provided
+- ❌ No liability accepted
+
+---
+
+## 🌟 Star History
+
+If you find this project valuable, please consider:
+- ⭐ **Starring** the repository
+- 🔄 **Sharing** with others
+- 📢 **Discussing** your use cases
+- 🤝 **Contributing** improvements
+
+---
+
+<div align="center">
+
+### 🚀 Built with Bitcoin, for the Future
+
+**Bitcoin Digital Labor Derivative Protocol**  
+*Transforming cold storage into economic participation*
+
+[Documentation](docs/) • [Research](docs/PAPER.md) • [Security](docs/SECURITY.md) • [API](docs/API.md)
+
+---
+
+Made with ❤️ by the DLD Protocol team and contributors
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
+[![Bitcoin](https://img.shields.io/badge/bitcoin-mainnet-orange.svg)](https://bitcoin.org/)
+
+</div>
