@@ -1,7 +1,7 @@
 use crate::api::handlers::{
     apply_labor, get_btc_peg, get_labor_history, get_labor_state, get_labor_value,
     get_participant_dividend, get_participant_velocity, get_pool_balance, get_rbi, get_status,
-    get_volatility, health_check,
+    get_volatility, health_check, root,
 };
 use crate::api::node::GlobalNode;
 use axum::{routing::{get, post}, Router};
@@ -10,6 +10,9 @@ use tower_http::cors::CorsLayer;
 /// Create the API router with all endpoints
 pub fn create_router(node: GlobalNode) -> Router {
     Router::new()
+        // Root endpoint
+        .route("/", get(root))
+        
         // Core endpoints
         .route("/health", get(health_check))
         .route("/status", get(get_status))

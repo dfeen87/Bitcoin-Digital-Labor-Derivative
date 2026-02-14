@@ -10,7 +10,9 @@ async fn main() {
     print_startup_banner();
 
     // Load configuration from environment
-    let port = std::env::var("BDLD_PORT")
+    // Render sets PORT env var, fall back to BDLD_PORT, then to 8080
+    let port = std::env::var("PORT")
+        .or_else(|_| std::env::var("BDLD_PORT"))
         .unwrap_or_else(|_| "8080".to_string())
         .parse::<u16>()
         .unwrap_or(8080);
@@ -48,6 +50,8 @@ async fn main() {
     tracing::info!("API server listening on {}", addr);
     
     println!("\n✓ Server running at: http://{}", addr);
+    println!("\nRoot Endpoint:");
+    println!("  GET  /                    - Root status message");
     println!("\nCore Endpoints:");
     println!("  GET  /health              - Service health check");
     println!("  GET  /status              - Version, uptime, and config");

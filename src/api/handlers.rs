@@ -15,6 +15,11 @@ use axum::{
 };
 use serde::Deserialize;
 
+/// Root endpoint - returns plaintext status message (text/plain)
+pub async fn root() -> &'static str {
+    "BDLD API is running"
+}
+
 /// Health check endpoint
 pub async fn health_check() -> Json<HealthResponse> {
     Json(HealthResponse {
