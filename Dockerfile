@@ -1,8 +1,8 @@
 # Multi-stage build for Bitcoin Digital Labor Derivative API
 # Optimized for Render.com free tier
 
-# Build stage
-FROM rust:1.75-slim as builder
+# Build stage - using nightly for edition2024 support
+FROM rustlang/rust:nightly-slim as builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
@@ -22,7 +22,7 @@ COPY tests ./tests
 COPY examples ./examples
 
 # Build the application in release mode with API feature
-RUN cargo build --release --bin api-server --features api --locked
+RUN cargo build --release --bin api-server --features api
 
 # Runtime stage
 FROM debian:bookworm-slim
