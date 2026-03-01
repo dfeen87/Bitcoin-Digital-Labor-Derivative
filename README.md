@@ -36,6 +36,7 @@
 - [🤝 Contributing](#-contributing)
 - [🔬 Research & Citation](#-research--citation)
 - [💬 Community](#-community)
+- [🤝 Acknowledgements](#acknowledgements) 
 - [📄 License](#-license)
 
 ---
