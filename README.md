@@ -1313,47 +1313,16 @@ See the [Contributing](#-contributing) section above! We welcome:
 
 ---
 
-## 📄 License
+## Acknowledgements
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+I would like to acknowledge **Microsoft Copilot**, **Anthropic Claude**, and **OpenAI ChatGPT** for their meaningful assistance in refining concepts, improving clarity, and strengthening the overall quality of this work.
 
-```
-MIT License
-
-Copyright (c) 2026 Don Michael Feeney Jr.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-```
-
-**What this means**:
-- ✅ Free to use commercially
-- ✅ Free to modify and distribute
-- ✅ Free to use privately
-- ✅ Must include license and copyright
-- ❌ No warranty provided
-- ❌ No liability accepted
 
 ---
 
-## 🌟 Star History
+## 📄 License
 
-If you find this project valuable, please consider:
-- ⭐ **Starring** the repository
-- 🔄 **Sharing** with others
-- 📢 **Discussing** your use cases
-- 🤝 **Contributing** improvements
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 
