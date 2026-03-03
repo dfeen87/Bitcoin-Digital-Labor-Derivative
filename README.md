@@ -4,7 +4,6 @@
 
 ### *Transforming Bitcoin Cold Storage into a Sustainable Economic Engine*
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
 [![Bitcoin](https://img.shields.io/badge/bitcoin-mainnet-orange.svg)](https://bitcoin.org/)
 [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/dfeen87/bitcoin-digital-labor-derivative/releases/tag/v1.0.0)
@@ -1323,7 +1322,8 @@ I would like to acknowledge **Microsoft Copilot**, **Anthropic Claude**, and **O
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is available for **non‑commercial use only** under the terms of the included LICENSE file.  
+Commercial use requires a separate paid license.
 
 ---
 
