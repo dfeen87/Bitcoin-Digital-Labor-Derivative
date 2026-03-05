@@ -1322,8 +1322,7 @@ I would like to acknowledge **Microsoft Copilot**, **Anthropic Claude**, and **O
 
 ## 📄 License
 
-This project is available for **non‑commercial use only** under the terms of the included LICENSE file.  
-Commercial use requires a separate paid license.
+MIT
 
 ---
 
