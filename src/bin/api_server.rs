@@ -16,30 +16,30 @@ async fn main() {
         .unwrap_or_else(|_| "8080".to_string())
         .parse::<u16>()
         .unwrap_or(8080);
-    
-    let node_id = std::env::var("BDLD_NODE_ID")
-        .unwrap_or_else(|_| "default-node".to_string());
-    
-    let environment = std::env::var("BDLD_ENV")
-        .unwrap_or_else(|_| "production".to_string());
+
+    let node_id = std::env::var("BDLD_NODE_ID").unwrap_or_else(|_| "default-node".to_string());
+
+    let environment = std::env::var("BDLD_ENV").unwrap_or_else(|_| "production".to_string());
 
     // Create the global node with configuration
-    let mut config = bitcoin_digital_labor_derivative::api::node::NodeConfiguration::default();
-    config.node_id = node_id.clone();
-    config.environment = environment.clone();
-    
+    let config = bitcoin_digital_labor_derivative::api::node::NodeConfiguration {
+        node_id: node_id.clone(),
+        environment: environment.clone(),
+        ..Default::default()
+    };
+
     let node = GlobalNode::new().with_config(config);
-    
+
     // Set an example pool balance (10 BTC = 1,000,000,000 sats)
     node.set_pool_balance(1_000_000_000);
-    
+
     // Set current block height
     node.set_block_height(800_000);
-    
+
     tracing::info!("Node ID: {}", node_id);
     tracing::info!("Environment: {}", environment);
     tracing::info!("Pool balance: {} sats", node.get_pool_balance());
-    
+
     // Create the API router
     // Note: Rate limiting is configured in the router (100 req/60s)
     // but implemented at the application level for simplicity
@@ -48,7 +48,7 @@ async fn main() {
     // Bind to address
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     tracing::info!("API server listening on {}", addr);
-    
+
     println!("\n✓ Server running at: http://{}", addr);
     println!("\nRoot Endpoint:");
     println!("  GET  /                    - Root status message");
@@ -75,10 +75,8 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind(addr)
         .await
         .expect("Failed to bind to address");
-    
-    axum::serve(listener, app)
-        .await
-        .expect("Server error");
+
+    axum::serve(listener, app).await.expect("Server error");
 }
 
 fn print_startup_banner() {
@@ -93,10 +91,10 @@ fn print_startup_banner() {
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 "#;
-    
+
     let version = env!("CARGO_PKG_VERSION");
     println!("{}", banner.replace("{version}", &format!("{:8}", version)));
-    
+
     tracing::info!("Starting BDLD API Server v{}", version);
     tracing::info!("Deterministic, safe, Bitcoin-denominated derivative model");
 }

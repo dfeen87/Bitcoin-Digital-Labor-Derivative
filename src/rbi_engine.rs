@@ -214,9 +214,9 @@ impl<P: EconomicDataProvider> RBIEngine<P> {
             RbiStatus::Invalid
         } else if rbi_value < self.thresholds.critical_low {
             RbiStatus::Critical
-        } else if rbi_value < self.thresholds.warning_low {
-            RbiStatus::Warning
-        } else if rbi_value > self.thresholds.overheating_high {
+        } else if rbi_value < self.thresholds.warning_low
+            || rbi_value > self.thresholds.overheating_high
+        {
             RbiStatus::Warning
         } else {
             RbiStatus::Healthy

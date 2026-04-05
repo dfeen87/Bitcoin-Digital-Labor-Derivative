@@ -7,8 +7,8 @@ pub enum RBIAlert {
 
 #[derive(Debug, Clone)]
 pub struct AlertThresholds {
-    pub critical_low: f64,  // default 0.8
-    pub warning_low: f64,   // default 1.0
+    pub critical_low: f64,     // default 0.8
+    pub warning_low: f64,      // default 1.0
     pub overheating_high: f64, // default 2.0
 }
 

@@ -1,7 +1,7 @@
 use crate::utxo_scoring::UtxoEntry;
 use crate::velocity_analyzer::{ChainDataSource, TxActivity, VelocityError};
-use bitcoin::amount::Amount;
 use bitcoin::address::NetworkUnchecked;
+use bitcoin::amount::Amount;
 use bitcoin::Address;
 use bitcoincore_rpc::json::GetTransactionResultDetailCategory;
 use bitcoincore_rpc::{Client, RpcApi};
@@ -39,9 +39,7 @@ impl BitcoinCoreChainDataSource {
             .iter()
             .map(|addr| {
                 Address::from_str(addr)
-                    .map_err(|e| {
-                        VelocityError::InvalidData(format!("invalid address {addr}: {e}"))
-                    })
+                    .map_err(|e| VelocityError::InvalidData(format!("invalid address {addr}: {e}")))
                     .map(|unchecked: Address<NetworkUnchecked>| unchecked.assume_checked())
             })
             .collect()
@@ -120,7 +118,8 @@ impl BitcoinCoreChainDataSource {
                             )));
                         }
                         let failure_class = Self::classify_rpc_error(&err);
-                        self.metrics.record_rpc_failure(action, failure_class, started.elapsed());
+                        self.metrics
+                            .record_rpc_failure(action, failure_class, started.elapsed());
                         debug!(
                             action,
                             attempt = attempt + 1,
@@ -317,7 +316,8 @@ impl ChainDataSource for BitcoinCoreChainDataSource {
             let address = match tx.detail.address.as_ref() {
                 Some(addr) => addr,
                 None => {
-                    self.metrics.record_partial_response("list_since_block_missing_address");
+                    self.metrics
+                        .record_partial_response("list_since_block_missing_address");
                     debug!("list_since_block missing address for send tx");
                     continue;
                 }
@@ -434,12 +434,7 @@ impl Metrics {
         debug!(action, elapsed_ms = elapsed.as_millis(), "rpc success");
     }
 
-    fn record_rpc_failure(
-        &self,
-        action: &'static str,
-        class: RpcFailureClass,
-        elapsed: Duration,
-    ) {
+    fn record_rpc_failure(&self, action: &'static str, class: RpcFailureClass, elapsed: Duration) {
         match class {
             RpcFailureClass::Transient => {
                 self.rpc_failure_transient
@@ -463,11 +458,7 @@ impl Metrics {
         self.rpc_timeout
             .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         self.record_rpc_latency(elapsed);
-        debug!(
-            action,
-            elapsed_ms = elapsed.as_millis(),
-            "rpc timeout"
-        );
+        debug!(action, elapsed_ms = elapsed.as_millis(), "rpc timeout");
     }
 
     fn record_rpc_latency(&self, elapsed: Duration) {
