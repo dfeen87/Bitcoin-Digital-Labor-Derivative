@@ -22,8 +22,9 @@ fn main() {
     // Set pool balance (10 BTC = 1,000,000,000 sats)
     let pool_balance_sats = 1_000_000_000u64;
     node.set_pool_balance(pool_balance_sats);
-    println!("✓ Set pool balance: {} sats ({} BTC)\n", 
-        pool_balance_sats, 
+    println!(
+        "✓ Set pool balance: {} sats ({} BTC)\n",
+        pool_balance_sats,
         pool_balance_sats as f64 / 100_000_000.0
     );
 
@@ -41,22 +42,20 @@ fn main() {
     };
 
     match node.rbi_engine.lock() {
-        Ok(mut engine) => {
-            match engine.calculate_rbi(&pool_state, 800_000) {
-                Ok(snapshot) => {
-                    println!("✓ RBI Snapshot:");
-                    println!("  - RBI Value: {:.4}", snapshot.rbi_value);
-                    println!("  - Status: {:?}", snapshot.status);
-                    println!("  - Healthy: {}", snapshot.is_healthy);
-                    println!("  - Components:");
-                    println!("    - V_DLD: {:.4}", snapshot.v_dld);
-                    println!("    - T_c: {:.4}", snapshot.t_c);
-                    println!("    - D_s: {:.4}", snapshot.d_s);
-                    println!("    - Productivity A: {:.4}", snapshot.productivity_a);
-                }
-                Err(e) => eprintln!("✗ Error calculating RBI: {}", e),
+        Ok(mut engine) => match engine.calculate_rbi(&pool_state, 800_000) {
+            Ok(snapshot) => {
+                println!("✓ RBI Snapshot:");
+                println!("  - RBI Value: {:.4}", snapshot.rbi_value);
+                println!("  - Status: {:?}", snapshot.status);
+                println!("  - Healthy: {}", snapshot.is_healthy);
+                println!("  - Components:");
+                println!("    - V_DLD: {:.4}", snapshot.v_dld);
+                println!("    - T_c: {:.4}", snapshot.t_c);
+                println!("    - D_s: {:.4}", snapshot.d_s);
+                println!("    - Productivity A: {:.4}", snapshot.productivity_a);
             }
-        }
+            Err(e) => eprintln!("✗ Error calculating RBI: {}", e),
+        },
         Err(e) => eprintln!("✗ Failed to acquire RBI engine lock: {}", e),
     }
 
@@ -70,22 +69,33 @@ fn main() {
 
     // Using the formula: D̂ᵢ = P̂ · (pᵢ·Tᵢ / Σ) · Vᵢ
     let weighted_stake = stake_amount as f64 * trust_coefficient;
-    
+
     // For simplicity, assume this is the only participant (Σ = pᵢ·Tᵢ)
     // In a real system with multiple participants, we'd sum all weighted stakes
     let total_weighted_stakes = weighted_stake;
     let proportion = weighted_stake / total_weighted_stakes; // = 1.0 for single participant
-    
+
     let dividend_sats = ((pool_balance_sats as f64) * proportion * velocity_multiplier) as u64;
 
     println!("✓ Dividend Calculation:");
     println!("  - Participant: alice");
-    println!("  - Stake: {} sats ({} BTC)", stake_amount, stake_amount as f64 / 100_000_000.0);
+    println!(
+        "  - Stake: {} sats ({} BTC)",
+        stake_amount,
+        stake_amount as f64 / 100_000_000.0
+    );
     println!("  - Trust Coefficient: {:.2}x", trust_coefficient);
     println!("  - Velocity Multiplier: {:.2}x", velocity_multiplier);
     println!("  - Weighted Stake: {:.2} sats", weighted_stake);
-    println!("  - Proportion: {:.4} (assuming single participant)", proportion);
-    println!("  - Dividend: {} sats ({:.8} BTC)", dividend_sats, dividend_sats as f64 / 100_000_000.0);
+    println!(
+        "  - Proportion: {:.4} (assuming single participant)",
+        proportion
+    );
+    println!(
+        "  - Dividend: {} sats ({:.8} BTC)",
+        dividend_sats,
+        dividend_sats as f64 / 100_000_000.0
+    );
 
     println!("\n✓ Example complete!");
 }

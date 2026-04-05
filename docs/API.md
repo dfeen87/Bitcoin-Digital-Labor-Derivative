@@ -36,7 +36,7 @@ Returns the health status of the API server.
 ```json
 {
   "status": "healthy",
-  "version": "0.1.0"
+  "version": "4.1.0"
 }
 ```
 
