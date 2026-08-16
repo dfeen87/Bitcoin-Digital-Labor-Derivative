@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this software or protocol in academic or technical work, please cite it as below."
 
 title: "Bitcoin Digital Labor Derivative Protocol"
-version: "4.1.0"
-date-released: 2026-02-05
+version: "5.0.0"
+date-released: 2026-02-14
 
 authors:
   - family-names: Feeney
@@ -13,16 +13,15 @@ authors:
 license: MIT
 
 repository-code: "https://github.com/dfeen87/bitcoin-digital-labor-derivative"
-repository-artifact: "https://github.com/dfeen87/bitcoin-digital-labor-derivative/releases/tag/v1.0.0"
+repository-artifact: "https://github.com/dfeen87/bitcoin-digital-labor-derivative/releases/tag/v5.0.0"
 
 abstract: >
   The Bitcoin Digital Labor Derivative (DLD) Protocol is a non-custodial,
   Bitcoin-native economic framework that transforms time-locked staking
   and cold storage into a measurable, velocity-aware distribution mechanism.
   The protocol introduces bounded velocity incentives, miner-coordinated
-  funding, and a Recession Bypass Index (RBI) to address deflationary pressure
-  in automated and AI-accelerated economies, while preserving Bitcoin’s
-  decentralization and sovereignty.
+  funding, real Satoshi disbursement via PSBTs and raw transactions, and an
+  AILEE Trust Layer safeguard system alongside the Recession Bypass Index (RBI).
 
 keywords:
   - Bitcoin
@@ -34,6 +33,7 @@ keywords:
   - staking
   - non-custodial systems
   - AI economics
+  - PSBT disbursement
 
 preferred-citation:
   type: software
@@ -42,6 +42,6 @@ preferred-citation:
       given-names: Don Michael
       name-particle: Jr.
   title: "Bitcoin Digital Labor Derivative Protocol"
-  version: "4.1.0"
+  version: "5.0.0"
   year: 2026
   url: "https://github.com/dfeen87/bitcoin-digital-labor-derivative"

@@ -1,6 +1,6 @@
 [package]
 name = "bitcoin-digital-labor-derivative"
-version = "4.1.0"
+version = "5.0.0"
 edition = "2021"
 license = "MIT"
 description = "Deterministic economic core and simulation framework for Bitcoin Digital Labor Derivative"
@@ -28,6 +28,9 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 bitcoin = "0.30"
 rust_decimal = "1.34"
+hex = "0.4"
+base64 = "0.21"
+uuid = { version = "1.0", features = ["v4"] }
 
 # Optional but already implied by current code usage
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
@@ -45,11 +48,10 @@ tokio = { version = "1", features = ["full"], optional = true }
 tower = { version = "0.4", optional = true, features = ["limit"] }
 tower-http = { version = "0.5", features = ["cors"], optional = true }
 tracing-subscriber = { version = "0.3", optional = true }
-uuid = { version = "1.0", features = ["v4"], optional = true }
 
 [dev-dependencies]
 pretty_assertions = "1.4"
 
 [features]
 rpc = ["bitcoincore-rpc", "tracing"]
-api = ["axum", "tokio", "tower", "tower-http", "tracing", "tracing-subscriber", "uuid"]
+api = ["axum", "tokio", "tower", "tower-http", "tracing", "tracing-subscriber"]

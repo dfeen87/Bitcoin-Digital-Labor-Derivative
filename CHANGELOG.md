@@ -1,5 +1,16 @@
 # Changelog
 
+## v5.0.0 — Satoshi Disbursement & AILEE Trust Layer
+
+### Added
+- **Satoshi Disbursement Engine**: Unsigned PSBT (Partially Signed Bitcoin Transaction) and raw transaction generation for bitcoin-holding entities to disburse satoshis to customers and general public without taking custodial key risk.
+- **AILEE Trust Layer Safeguards**: Payout policy evaluation engine with single-payout maximum limits, network address validation, dust limit checks, and risk scoring.
+- **Payout Persistence in SQLite**: Full schema extension to persist payout records (`payout_id`, `recipient_address`, `amount_sats`, `fee_sats`, `psbt_base64`, `raw_tx_hex`, `txid`, `status`, `timestamp`, `trust_audit_json`, `is_dry_run`).
+- **REST API Endpoints**:
+  - `POST /api/v1/payouts/execute` - Execute payout request and return unsigned PSBT/raw transaction.
+  - `GET /api/v1/payouts/:id` - Fetch payout record by ID.
+  - `GET /api/v1/payouts/history` - List all past payout transaction records.
+
 ## Unreleased
 
 ### Added
