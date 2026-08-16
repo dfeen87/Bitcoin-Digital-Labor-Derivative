@@ -123,23 +123,22 @@ impl DisbursementEngine {
         }
 
         // 2. Recipient address validation
-        if Address::from_str(&req.recipient_address)
-            .map(|addr| addr.require_network(self.config.network))
-            .is_err()
-        {
-            // Try unchecked network validation if strict check fails to inspect address
-            if Address::from_str(&req.recipient_address).is_err() {
+        match Address::from_str(&req.recipient_address) {
+            Err(_) => {
                 audit.passed = false;
                 audit.risk_score = 1.0;
                 audit.warnings.push(format!(
                     "Invalid Bitcoin address for network {:?}",
                     self.config.network
                 ));
-            } else {
-                audit.warnings.push(format!(
-                    "Address network mismatch warning for network {:?}",
-                    self.config.network
-                ));
+            }
+            Ok(addr) => {
+                if addr.require_network(self.config.network).is_err() {
+                    audit.warnings.push(format!(
+                        "Address network mismatch warning for network {:?}",
+                        self.config.network
+                    ));
+                }
             }
         }
 
@@ -203,7 +202,7 @@ impl DisbursementEngine {
 
         let mut outputs = vec![TxOut {
             value: req.amount_sats,
-            script_pubkey: recipient_script,
+            script_pubkey: recipient_script.clone(),
         }];
 
         if change_sats >= 546 {
@@ -213,16 +212,13 @@ impl DisbursementEngine {
                     .assume_checked()
                     .script_pubkey()
             } else {
-                // Default to recipient's script for mock change if omitted
-                ScriptBuf::new()
+                recipient_script.clone()
             };
 
-            if !change_script.is_empty() {
-                outputs.push(TxOut {
-                    value: change_sats,
-                    script_pubkey: change_script,
-                });
-            }
+            outputs.push(TxOut {
+                value: change_sats,
+                script_pubkey: change_script,
+            });
         }
 
         let tx = Transaction {
