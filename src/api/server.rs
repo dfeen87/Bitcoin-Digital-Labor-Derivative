@@ -1,7 +1,8 @@
 use crate::api::handlers::{
-    apply_labor, get_btc_peg, get_labor_history, get_labor_state, get_labor_value,
-    get_participant_dividend, get_participant_velocity, get_pool_balance, get_rbi, get_status,
-    get_volatility, health_check, root,
+    apply_labor, execute_payout_handler, get_btc_peg, get_labor_history, get_labor_state,
+    get_labor_value, get_participant_dividend, get_participant_velocity, get_payout_handler,
+    get_payout_history_handler, get_pool_balance, get_rbi, get_status, get_volatility,
+    health_check, root,
 };
 use crate::api::node::GlobalNode;
 use axum::{
@@ -26,6 +27,10 @@ pub fn create_router(node: GlobalNode) -> Router {
         .route("/labor/volatility", get(get_volatility))
         // BTC peg endpoint
         .route("/btc/peg", get(get_btc_peg))
+        // Payout endpoints
+        .route("/api/v1/payouts/execute", post(execute_payout_handler))
+        .route("/api/v1/payouts/history", get(get_payout_history_handler))
+        .route("/api/v1/payouts/:id", get(get_payout_handler))
         // Legacy API v1 routes (maintained for backward compatibility)
         .route("/api/v1/rbi", get(get_rbi))
         .route("/api/v1/pool/balance", get(get_pool_balance))

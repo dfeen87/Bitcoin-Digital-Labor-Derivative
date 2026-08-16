@@ -1,9 +1,13 @@
 use crate::api::types::LaborHistoryEntry;
+use crate::disbursement::{
+    DisbursementConfig, DisbursementEngine, PayoutRequest, PayoutTransactionResult,
+};
 use crate::economic_oracle::MockEconomicDataProvider;
 use crate::rbi_engine::RBIEngine;
 use crate::simulation::state::SimulationParticipant;
 use crate::sqlite_participant_registry::SqliteParticipantRegistry;
 use chrono::{DateTime, Utc};
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex, RwLock};
 
 /// GlobalNode provides centralized access to all core protocol components.
@@ -15,6 +19,12 @@ pub struct GlobalNode {
 
     /// Participant registry for looking up participant data
     pub participant_registry: Option<Arc<SqliteParticipantRegistry>>,
+
+    /// Disbursement engine for payout transaction generation & AILEE safety checks
+    pub disbursement_engine: Arc<DisbursementEngine>,
+
+    /// In-memory payouts store (when sqlite registry is absent or read-only)
+    pub in_memory_payouts: Arc<RwLock<HashMap<String, PayoutTransactionResult>>>,
 
     /// Current pool balance in satoshis
     pub pool_balance: Arc<RwLock<u64>>,
@@ -65,10 +75,13 @@ impl GlobalNode {
             productivity: 1.2,
         };
         let rbi_engine = RBIEngine::new(provider);
+        let disbursement_engine = DisbursementEngine::new(DisbursementConfig::default());
 
         Self {
             rbi_engine: Arc::new(Mutex::new(rbi_engine)),
             participant_registry: None,
+            disbursement_engine: Arc::new(disbursement_engine),
+            in_memory_payouts: Arc::new(RwLock::new(HashMap::new())),
             pool_balance: Arc::new(RwLock::new(0)),
             startup_time: Arc::new(Utc::now()),
             config: Arc::new(NodeConfiguration::default()),
@@ -88,6 +101,60 @@ impl GlobalNode {
     pub fn with_config(mut self, config: NodeConfiguration) -> Self {
         self.config = Arc::new(config);
         self
+    }
+
+    /// Execute / generate a payout request
+    pub fn execute_payout(&self, req: &PayoutRequest) -> Result<PayoutTransactionResult, String> {
+        let payout_id = format!("payout-{}", uuid::Uuid::new_v4());
+        let res = self
+            .disbursement_engine
+            .create_unsigned_payout(payout_id, req)?;
+
+        // Persist to registry if available
+        if let Some(ref registry) = self.participant_registry {
+            let _ = registry.save_payout(&res);
+        }
+
+        // Always update in-memory cache
+        if let Ok(mut payouts) = self.in_memory_payouts.write() {
+            payouts.insert(res.payout_id.clone(), res.clone());
+        }
+
+        Ok(res)
+    }
+
+    /// Retrieve payout by ID
+    pub fn get_payout(&self, payout_id: &str) -> Option<PayoutTransactionResult> {
+        if let Some(ref registry) = self.participant_registry {
+            if let Ok(Some(payout)) = registry.get_payout_by_id(payout_id) {
+                return Some(payout);
+            }
+        }
+
+        if let Ok(payouts) = self.in_memory_payouts.read() {
+            return payouts.get(payout_id).cloned();
+        }
+
+        None
+    }
+
+    /// List all payouts
+    pub fn list_payouts(&self) -> Vec<PayoutTransactionResult> {
+        if let Some(ref registry) = self.participant_registry {
+            if let Ok(payouts) = registry.get_all_payouts() {
+                if !payouts.is_empty() {
+                    return payouts;
+                }
+            }
+        }
+
+        if let Ok(payouts) = self.in_memory_payouts.read() {
+            let mut list: Vec<PayoutTransactionResult> = payouts.values().cloned().collect();
+            list.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+            return list;
+        }
+
+        Vec::new()
     }
 
     /// Set the pool balance

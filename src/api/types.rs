@@ -1,3 +1,4 @@
+use crate::disbursement::{PayoutRequest, PayoutTransactionResult};
 use crate::rbi_engine::RbiStatus;
 use serde::{Deserialize, Serialize};
 
@@ -178,4 +179,14 @@ pub struct BtcPegResponse {
     pub status: String,
     pub pool_balance_btc: f64,
     pub total_stakes_btc: f64,
+}
+
+/// Payout execute request
+pub type PayoutExecuteRequest = PayoutRequest;
+
+/// Payout list history response
+#[derive(Debug, Serialize)]
+pub struct PayoutHistoryResponse {
+    pub payouts: Vec<PayoutTransactionResult>,
+    pub total_count: usize,
 }

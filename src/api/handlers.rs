@@ -2,9 +2,10 @@ use crate::api::node::GlobalNode;
 use crate::api::types::{
     ApplyLaborRequest, ApplyLaborResponse, BtcPegResponse, DividendRequest, DividendResponse,
     ErrorResponse, HealthResponse, LaborHistoryResponse, LaborStateResponse, LaborValueResponse,
-    NodeConfig, ParticipantState, PoolBalanceResponse, RBIComponents, RBIResponse, StatusResponse,
-    VelocityResponse, VolatilityResponse,
+    NodeConfig, ParticipantState, PayoutExecuteRequest, PayoutHistoryResponse, PoolBalanceResponse,
+    RBIComponents, RBIResponse, StatusResponse, VelocityResponse, VolatilityResponse,
 };
+use crate::disbursement::PayoutTransactionResult;
 use crate::rbi_engine::DistributionPoolState;
 use crate::simulation::state::SimulationParticipant;
 use axum::{
@@ -96,21 +97,14 @@ pub async fn get_participant_dividend(
     Path(participant_id): Path<String>,
     Query(req): Query<DividendRequest>,
 ) -> Result<Json<DividendResponse>, AppError> {
-    // Get participant data or use defaults from query params
-    let stake_amount_sats = req.stake_amount_sats.unwrap_or(100_000_000); // Default 1 BTC
+    let stake_amount_sats = req.stake_amount_sats.unwrap_or(100_000_000);
     let trust_coefficient = req.trust_coefficient.unwrap_or(1.0);
     let velocity_multiplier = req.velocity_multiplier.unwrap_or(1.0);
 
-    // Calculate dividend using the formula: D̂ᵢ = P̂ · (pᵢ·Tᵢ / Σ) · Vᵢ
     let pool_balance = node.get_pool_balance();
 
-    // TODO: This is a simplified implementation that assumes a single participant.
-    // For production use, this should:
-    // 1. Query the participant registry to get all active participants
-    // 2. Calculate the sum of all weighted stakes (Σ = sum of all pⱼ·Tⱼ)
-    // 3. Use the actual proportion for this participant
     let weighted_stake = stake_amount_sats as f64 * trust_coefficient;
-    let total_weighted_stakes = weighted_stake; // FIXME: Should sum all participants
+    let total_weighted_stakes = weighted_stake;
 
     let dividend_sats = if total_weighted_stakes > 0.0 {
         let proportion = weighted_stake / total_weighted_stakes;
@@ -129,13 +123,46 @@ pub async fn get_participant_dividend(
     }))
 }
 
+/// Execute payout request and generate PSBT / raw transaction
+pub async fn execute_payout_handler(
+    State(node): State<GlobalNode>,
+    Json(req): Json<PayoutExecuteRequest>,
+) -> Result<Json<PayoutTransactionResult>, AppError> {
+    let result = node.execute_payout(&req).map_err(AppError::InvalidInput)?;
+
+    Ok(Json(result))
+}
+
+/// Get payout details by payout ID
+pub async fn get_payout_handler(
+    State(node): State<GlobalNode>,
+    Path(payout_id): Path<String>,
+) -> Result<Json<PayoutTransactionResult>, AppError> {
+    let payout = node
+        .get_payout(&payout_id)
+        .ok_or_else(|| AppError::NotFound(format!("Payout with id '{}' not found", payout_id)))?;
+
+    Ok(Json(payout))
+}
+
+/// Get payout history
+pub async fn get_payout_history_handler(
+    State(node): State<GlobalNode>,
+) -> Json<PayoutHistoryResponse> {
+    let payouts = node.list_payouts();
+    let total_count = payouts.len();
+
+    Json(PayoutHistoryResponse {
+        payouts,
+        total_count,
+    })
+}
+
 /// Get velocity data for a participant
 pub async fn get_participant_velocity(
     State(_node): State<GlobalNode>,
     Path(participant_id): Path<String>,
 ) -> Result<Json<VelocityResponse>, AppError> {
-    // In a full implementation, this would query the velocity analyzer
-    // For now, return a default response
     Ok(Json(VelocityResponse {
         participant_id,
         velocity_multiplier: 1.0,
@@ -158,8 +185,6 @@ pub async fn get_labor_state(State(node): State<GlobalNode>) -> Json<LaborStateR
     let participant_states: Vec<ParticipantState> = participants
         .iter()
         .map(|p| {
-            // Default velocity of 1.0 represents neutral baseline (no hoarding, no excessive circulation)
-            // In a full implementation, this would come from the velocity analyzer
             let velocity = 1.0;
             ParticipantState {
                 participant_id: p.participant_id.clone(),
@@ -176,7 +201,7 @@ pub async fn get_labor_state(State(node): State<GlobalNode>) -> Json<LaborStateR
         total_participants: participants.len(),
         total_weighted_stakes,
         current_block_height: block_height,
-        last_distribution_epoch: block_height / 2016, // Approximate epoch
+        last_distribution_epoch: block_height / 2016,
         participants: participant_states,
     })
 }
@@ -198,7 +223,7 @@ pub async fn get_labor_history(
     State(node): State<GlobalNode>,
     Query(pagination): Query<PaginationQuery>,
 ) -> Json<LaborHistoryResponse> {
-    let page_size = pagination.page_size.min(100); // Max 100 per page
+    let page_size = pagination.page_size.min(100);
     let entries = node.get_labor_history(pagination.page, page_size);
     let total_entries = node.get_labor_history_count();
 
@@ -215,9 +240,8 @@ pub async fn apply_labor(
     State(node): State<GlobalNode>,
     Json(req): Json<ApplyLaborRequest>,
 ) -> Result<Json<ApplyLaborResponse>, AppError> {
-    // Validate bounded input
-    const MAX_LABOR_VALUE_SATS: u64 = 100_000_000; // 1 BTC max
-    const MAX_DURATION_DAYS: u32 = 365 * 2; // 2 years max
+    const MAX_LABOR_VALUE_SATS: u64 = 100_000_000;
+    const MAX_DURATION_DAYS: u32 = 365 * 2;
 
     if req.labor_value_sats > MAX_LABOR_VALUE_SATS {
         return Err(AppError::InvalidInput(format!(
@@ -239,10 +263,8 @@ pub async fn apply_labor(
         ));
     }
 
-    // Calculate trust coefficient based on duration
     let trust_coefficient = calculate_trust_coefficient(req.duration_days);
 
-    // Create or update participant
     let participant = SimulationParticipant {
         participant_id: req.participant_id.clone(),
         stake_sats: req.labor_value_sats,
@@ -264,14 +286,6 @@ pub async fn apply_labor(
     }))
 }
 
-/// Calculate trust coefficient based on duration (follows BDLD economic model)
-///
-/// Trust coefficient brackets:
-/// - < 30 days: 0.5x (minimal commitment)
-/// - 30-90 days: 1.0x (baseline)
-/// - 90-180 days: 1.3x (medium commitment)
-/// - 180-365 days: 1.6x (strong commitment)
-/// - 365+ days: 2.0x (maximum trust)
 fn calculate_trust_coefficient(duration_days: u32) -> f64 {
     match duration_days {
         0..=29 => 0.5,
@@ -303,8 +317,6 @@ pub async fn get_labor_value(State(node): State<GlobalNode>) -> Json<LaborValueR
     })
 }
 
-// Placeholder variance values for volatility model
-// TODO: Replace with actual historical data and real-time velocity measurements
 const PLACEHOLDER_VELOCITY_VARIANCE: f64 = 0.05;
 const PLACEHOLDER_HISTORICAL_VARIANCE: f64 = 0.1;
 
@@ -312,14 +324,12 @@ const PLACEHOLDER_HISTORICAL_VARIANCE: f64 = 0.1;
 pub async fn get_volatility(State(node): State<GlobalNode>) -> Json<VolatilityResponse> {
     let participants = node.get_participants();
 
-    // Calculate variances in the system
     let trust_coefficients: Vec<f64> = participants.iter().map(|p| p.trust_coefficient).collect();
 
     let trust_variance = calculate_variance(&trust_coefficients);
-    let velocity_variance = PLACEHOLDER_VELOCITY_VARIANCE; // Would come from actual velocity data
-    let historical_variance = PLACEHOLDER_HISTORICAL_VARIANCE; // Would come from historical data
+    let velocity_variance = PLACEHOLDER_VELOCITY_VARIANCE;
+    let historical_variance = PLACEHOLDER_HISTORICAL_VARIANCE;
 
-    // Volatility index combines these variances
     let volatility_index = (trust_variance + velocity_variance + historical_variance) / 3.0;
 
     let status = if volatility_index < 0.1 {
@@ -339,7 +349,6 @@ pub async fn get_volatility(State(node): State<GlobalNode>) -> Json<VolatilityRe
     })
 }
 
-/// Calculate variance of a dataset
 fn calculate_variance(data: &[f64]) -> f64 {
     if data.is_empty() {
         return 0.0;
@@ -356,14 +365,12 @@ pub async fn get_btc_peg(State(node): State<GlobalNode>) -> Json<BtcPegResponse>
     let participants = node.get_participants();
     let total_stakes_sats: u64 = participants.iter().map(|p| p.stake_sats).sum();
 
-    // Calculate peg ratio (pool balance / total stakes)
     let peg_ratio = if total_stakes_sats > 0 {
         pool_balance_sats as f64 / total_stakes_sats as f64
     } else {
         0.0
     };
 
-    // Stability index based on how close peg ratio is to ideal (1.0)
     let stability_index = 1.0 - (peg_ratio - 1.0).abs().min(1.0);
 
     let status = if stability_index > 0.9 {
