@@ -7,6 +7,7 @@
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
 [![Bitcoin](https://img.shields.io/badge/bitcoin-mainnet-orange.svg)](https://bitcoin.org/)
 [![Version](https://img.shields.io/badge/version-5.0.0-green.svg)](https://github.com/dfeen87/bitcoin-digital-labor-derivative/releases/tag/v5.0.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
 [![Security](https://img.shields.io/badge/security-audited-success.svg)](docs/SECURITY.md)
 
