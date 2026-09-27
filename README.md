@@ -6,7 +6,7 @@
 
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
 [![Bitcoin](https://img.shields.io/badge/bitcoin-mainnet-orange.svg)](https://bitcoin.org/)
-[![Version](https://img.shields.io/badge/version-5.0.0-green.svg)](https://github.com/dfeen87/bitcoin-digital-labor-derivative/releases/tag/v5.0.0)
+[![Version](https://img.shields.io/badge/version-5.1.0-green.svg)](https://github.com/dfeen87/bitcoin-digital-labor-derivative/releases/tag/v5.1.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
 [![Security](https://img.shields.io/badge/security-audited-success.svg)](docs/SECURITY.md)
@@ -620,7 +620,7 @@ cargo run --bin api-server --features api
 
 # 1. Health check
 curl http://localhost:3000/health
-# {"status":"healthy","version":"5.0.0"}
+# {"status":"healthy","version":"5.1.0"}
 
 # 2. Get current RBI status
 curl http://localhost:3000/api/v1/rbi | jq
@@ -1143,7 +1143,7 @@ If you use this software or protocol in academic or technical work, please cite:
   author = {Feeney, Don Michael Jr.},
   title = {Bitcoin Digital Labor Derivative Protocol},
   year = {2026},
-  version = {5.0.0},
+  version = {5.1.0},
   url = {https://github.com/dfeen87/bitcoin-digital-labor-derivative},
   note = {A non-custodial, Bitcoin-native economic framework addressing 
           demand-shock deflation through time-locked staking and 
@@ -1153,7 +1153,7 @@ If you use this software or protocol in academic or technical work, please cite:
 
 **APA Format**:
 ```
-Feeney, D. M., Jr. (2026). Bitcoin Digital Labor Derivative Protocol (Version 5.0.0)
+Feeney, D. M., Jr. (2026). Bitcoin Digital Labor Derivative Protocol (Version 5.1.0)
 [Computer software]. https://github.com/dfeen87/bitcoin-digital-labor-derivative
 ```
 

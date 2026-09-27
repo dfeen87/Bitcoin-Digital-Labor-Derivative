@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software or protocol in academic or technical work, please cite it as below."
 
 title: "Bitcoin Digital Labor Derivative Protocol"
-version: "5.0.0"
+version: "5.1.0"
 date-released: 2026-02-14
 
 authors:
@@ -13,7 +13,7 @@ authors:
 license: MIT
 
 repository-code: "https://github.com/dfeen87/bitcoin-digital-labor-derivative"
-repository-artifact: "https://github.com/dfeen87/bitcoin-digital-labor-derivative/releases/tag/v5.0.0"
+repository-artifact: "https://github.com/dfeen87/bitcoin-digital-labor-derivative/releases/tag/v5.1.0"
 
 abstract: >
   The Bitcoin Digital Labor Derivative (DLD) Protocol is a non-custodial,
@@ -42,6 +42,6 @@ preferred-citation:
       given-names: Don Michael
       name-particle: Jr.
   title: "Bitcoin Digital Labor Derivative Protocol"
-  version: "5.0.0"
+  version: "5.1.0"
   year: 2026
   url: "https://github.com/dfeen87/bitcoin-digital-labor-derivative"

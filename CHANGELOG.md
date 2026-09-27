@@ -1,5 +1,16 @@
 # Changelog
 
+## v5.1.0 — Deterministic Simulation & RBI Enhancements
+
+### Added
+- Deterministic simulation harness with offline scenarios and JSON reporting.
+- Recorded economic snapshot provider for deterministic oracle inputs.
+
+### Changed
+- RBI engine enforces indeterminate status for near-zero demand shock and empty/zero-stake pools, and clamps velocity using configured bounds.
+- UTXO age computation rejects future-height entries.
+- SQLite participant registry rejects address reuse across participants.
+
 ## v5.0.0 — Satoshi Disbursement & AILEE Trust Layer
 
 ### Added
@@ -10,17 +21,6 @@
   - `POST /api/v1/payouts/execute` - Execute payout request and return unsigned PSBT/raw transaction.
   - `GET /api/v1/payouts/:id` - Fetch payout record by ID.
   - `GET /api/v1/payouts/history` - List all past payout transaction records.
-
-## Unreleased
-
-### Added
-- Deterministic simulation harness with offline scenarios and JSON reporting.
-- Recorded economic snapshot provider for deterministic oracle inputs.
-
-### Changed
-- RBI engine enforces indeterminate status for near-zero demand shock and empty/zero-stake pools, and clamps velocity using configured bounds.
-- UTXO age computation rejects future-height entries.
-- SQLite participant registry rejects address reuse across participants.
 
 ## v1.0.0 — Initial Stable Release
 
