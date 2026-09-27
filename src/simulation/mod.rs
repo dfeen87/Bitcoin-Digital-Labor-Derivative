@@ -59,7 +59,7 @@ pub fn run_scenario(scenario: &SimulationScenario) -> ScenarioReport {
         steps.push(step_report);
     }
 
-    steps.sort_by(|a, b| a.step_index.cmp(&b.step_index));
+    steps.sort_by_key(|step| step.step_index);
     invariants.sort_by(|a, b| {
         a.step_index
             .cmp(&b.step_index)
