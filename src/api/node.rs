@@ -205,7 +205,8 @@ impl GlobalNode {
     /// Get labor history (paginated)
     pub fn get_labor_history(&self, page: u32, page_size: u32) -> Vec<LaborHistoryEntry> {
         if let Ok(history) = self.labor_history.read() {
-            let start = (page * page_size) as usize;
+            let start =
+                usize::try_from(u64::from(page) * u64::from(page_size)).unwrap_or(usize::MAX);
             history
                 .iter()
                 .skip(start)

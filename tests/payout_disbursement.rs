@@ -53,6 +53,33 @@ fn test_ailee_trust_layer_safeguard_policy() {
 }
 
 #[test]
+fn test_payout_rejects_wrong_network_and_fee_overflow() {
+    let engine = DisbursementEngine::new(DisbursementConfig::default());
+    let mut req = PayoutRequest {
+        recipient_address: "mkHS9ne12qx9pS9VojpwU5xtRd4T7X7ZUt".to_string(),
+        amount_sats: 100_000,
+        funding_utxo_txid: None,
+        funding_utxo_vout: None,
+        funding_utxo_value_sats: Some(200_000),
+        change_address: None,
+        fee_rate_sats_per_vbyte: Some(10),
+        dry_run: None,
+    };
+
+    let network_error = engine
+        .create_unsigned_payout("wrong-network".to_string(), &req)
+        .expect_err("testnet recipient must be rejected on mainnet");
+    assert!(network_error.contains("network mismatch"));
+
+    req.recipient_address = "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh".to_string();
+    req.fee_rate_sats_per_vbyte = Some(u64::MAX);
+    let overflow_error = engine
+        .create_unsigned_payout("fee-overflow".to_string(), &req)
+        .expect_err("overflowing fee calculation must be rejected");
+    assert!(overflow_error.contains("fee overflowed"));
+}
+
+#[test]
 fn test_payout_sqlite_persistence() {
     let temp_db = std::env::temp_dir().join(format!("test_payouts_{}.db", uuid::Uuid::new_v4()));
     let registry =

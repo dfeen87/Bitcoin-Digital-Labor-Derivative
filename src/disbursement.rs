@@ -134,8 +134,10 @@ impl DisbursementEngine {
             }
             Ok(addr) => {
                 if addr.require_network(self.config.network).is_err() {
+                    audit.passed = false;
+                    audit.risk_score = 1.0;
                     audit.warnings.push(format!(
-                        "Address network mismatch warning for network {:?}",
+                        "Address network mismatch for network {:?}",
                         self.config.network
                     ));
                 }
@@ -170,7 +172,8 @@ impl DisbursementEngine {
 
         let recipient_addr = Address::from_str(&req.recipient_address)
             .map_err(|e| format!("Invalid recipient address: {e}"))?
-            .assume_checked();
+            .require_network(self.config.network)
+            .map_err(|e| format!("Recipient address network mismatch: {e}"))?;
 
         let recipient_script = recipient_addr.script_pubkey();
 
@@ -181,17 +184,27 @@ impl DisbursementEngine {
         let utxo_txid = Txid::from_str(&dummy_txid_str)
             .map_err(|e| format!("Invalid funding UTXO txid: {e}"))?;
         let utxo_vout = req.funding_utxo_vout.unwrap_or(0);
-        let utxo_value = req
-            .funding_utxo_value_sats
-            .unwrap_or(req.amount_sats + 10_000);
+        let utxo_value = match req.funding_utxo_value_sats {
+            Some(value) => value,
+            None => req
+                .amount_sats
+                .checked_add(10_000)
+                .ok_or_else(|| "Default funding UTXO value overflowed".to_string())?,
+        };
 
         let fee_rate = req
             .fee_rate_sats_per_vbyte
             .unwrap_or(self.config.default_fee_rate);
         let estimated_vsize = 140u64; // Approx vsize for 1-in 2-out P2WPKH
-        let fee_sats = fee_rate * estimated_vsize;
+        let fee_sats = fee_rate
+            .checked_mul(estimated_vsize)
+            .ok_or_else(|| "Calculated transaction fee overflowed".to_string())?;
+        let required_sats = req
+            .amount_sats
+            .checked_add(fee_sats)
+            .ok_or_else(|| "Required payout plus fee overflowed".to_string())?;
 
-        if utxo_value < req.amount_sats + fee_sats {
+        if utxo_value < required_sats {
             return Err(format!(
                 "Insufficient funding UTXO value: available {} sats, required payout {} sats + fee {} sats",
                 utxo_value, req.amount_sats, fee_sats
@@ -209,7 +222,8 @@ impl DisbursementEngine {
             let change_script = if let Some(ref change_addr_str) = req.change_address {
                 Address::from_str(change_addr_str)
                     .map_err(|e| format!("Invalid change address: {e}"))?
-                    .assume_checked()
+                    .require_network(self.config.network)
+                    .map_err(|e| format!("Change address network mismatch: {e}"))?
                     .script_pubkey()
             } else {
                 recipient_script.clone()
